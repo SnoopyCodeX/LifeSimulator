@@ -1,0 +1,149 @@
+package com.github.jotask.neat.engine;
+
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
+import com.github.jotask.neat.Neat;
+import com.github.jotask.neat.engine.entity.Enemy;
+import com.github.jotask.neat.engine.entity.Food;
+import com.github.jotask.neat.engine.entity.Radar;
+
+/**
+ * Factory
+ *
+ * @author Jose Vives Iznardo
+ * @since 11/02/2017
+ */
+public class Factory {
+
+    private Neat neat;
+
+    public Factory(final Neat neat) {
+        this.neat = neat;
+    }
+
+    public Enemy getEnemy(){
+        final Vector2 p = getRandomPositionOnWorld();
+        float x = p.x;
+        float y = p.y;
+        float radius = .5f;
+        return this.getEnemy(x, y, radius);
+    }
+
+    public Enemy getEnemy(final float x, final float y, float radius){
+
+        final Body body = createBody(x, y);
+
+        Fixture enemybody = createEnemyBody(body, radius);
+
+        Fixture radarBody = createRadar(body);
+
+        Radar radar = new Radar();
+        radarBody.setUserData(radar);
+
+        Enemy enemy = new Enemy(body, radar);
+
+        radar.setEnemy(enemy);
+
+        enemybody.setUserData(enemy);
+
+        return enemy;
+
+    }
+
+    private Fixture createRadar(final Body body){
+        CircleShape shape = new CircleShape();
+        shape.setRadius(Radar.SIZE);
+        FixtureDef fd = new FixtureDef();
+        fd.isSensor = true;
+        fd.shape = shape;
+        Fixture f = body.createFixture(fd);
+        shape.dispose();
+        return f;
+    }
+
+    public void createWalls(){
+        float WIDTH = 21f / 2f;
+        float HEIGHT = 11f / 2f;
+
+        BodyDef bd = new BodyDef();
+        bd.type = BodyDef.BodyType.StaticBody;
+
+        Vector2[] vertices = new Vector2[]{
+                new Vector2(-WIDTH, -HEIGHT),
+                new Vector2(WIDTH, -HEIGHT),
+                new Vector2(WIDTH, HEIGHT),
+                new Vector2(-WIDTH, HEIGHT)
+        };
+
+        Body body = neat.getWorld().createBody(bd);
+
+        ChainShape shape = new ChainShape();
+        shape.createLoop(vertices);
+        FixtureDef fd = new FixtureDef();
+        fd.shape = shape;
+
+        body.createFixture(fd);
+
+    }
+
+    public Food food(){
+        Vector2 p = getRandomPositionOnWorld();
+        float x = p.x;
+        float y = p.y;
+        float radius = .1f;
+        return this.food(x, y, radius);
+    }
+
+    public Food food(float x, float y, float radius){
+
+        Body body = this.createBody(x, y);
+
+        Fixture fix = this.createEnemyBody(body, radius);
+
+        Food food = new Food(body);
+
+        fix.setUserData(food);
+
+        EntityManager.add(food);
+
+        return food;
+
+    }
+
+    private Vector2 getRandomPositionOnWorld(){
+        float w = 21f / 2f;
+        float h = 11f / 2f;
+        float x = JRandom.random(w, -w);
+        float y = JRandom.random(h, -h);
+        return new Vector2(x, y);
+    }
+
+    private Body createBody(float x, float y){
+
+        BodyDef bd = new BodyDef();
+        bd.type = BodyDef.BodyType.DynamicBody;
+        bd.position.set(x, y);
+
+        final Body body = neat.getWorld().createBody(bd);
+
+        return body;
+
+    }
+
+    private Fixture createEnemyBody(final Body body, float radius){
+
+        CircleShape shape = new CircleShape();
+        shape.setRadius(radius);
+
+        FixtureDef fd = new FixtureDef();
+        fd.shape = shape;
+
+        Fixture fix = body.createFixture(fd);
+
+        shape.dispose();
+
+        return fix;
+
+    }
+
+}
