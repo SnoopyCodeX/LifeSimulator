@@ -3,9 +3,12 @@ package com.github.jotask.neat.engine;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.engine.entity.Enemy;
-import com.github.jotask.neat.engine.entity.Food;
-import com.github.jotask.neat.engine.entity.Radar;
+import com.github.jotask.neat.engine.entity.*;
+import com.github.jotask.neat.engine.radar.RadarEnemy;
+import com.github.jotask.neat.engine.radar.RadarPlayer;
+import com.github.jotask.neat.jneat.Genome;
+import com.github.jotask.neat.jneat.NeatEnemy;
+import com.github.jotask.neat.jneat.Species;
 
 /**
  * Factory
@@ -21,7 +24,61 @@ public class Factory {
         this.neat = neat;
     }
 
-    public Enemy getEnemy(){
+    public final Player getPlayer(){
+
+        final float radius = .5f;
+
+        final Vector2 p = getRandomPositionOnWorld();
+        final Body body = createBody(p.x, p.y);
+
+        Fixture playerBody = createEntityBody(body, radius);
+        Fixture radarBody = createRadar(body);
+
+        RadarPlayer radar = new RadarPlayer();
+        radarBody.setUserData(radar);
+
+        Player player = new Player(body, radar);
+        radar.setEnt(player);
+        playerBody.setUserData(player);
+
+        body.setUserData(Entity.Type.PLAYER);
+
+        EntityManager.add(player);
+
+        return player;
+
+
+    }
+
+    public final NeatEnemy getNeatEnemy(final Genome genome, final Species species){
+
+        final Vector2 p = getRandomPositionOnWorld();
+        float radius = .5f;
+
+        final Body body = createBody(p.x, p.y);
+
+        Fixture enemybody = createEntityBody(body, radius);
+
+        Fixture radarBody = createRadar(body);
+
+        RadarEnemy radar = new RadarEnemy();
+        radarBody.setUserData(radar);
+
+        NeatEnemy enemy = new NeatEnemy(body, radar, genome, species);
+
+        radar.setEnt(enemy);
+
+        body.setUserData(Entity.Type.ENEMY);
+
+        enemybody.setUserData(enemy);
+
+        EntityManager.add(enemy);
+
+        return enemy;
+
+    }
+
+    public synchronized Enemy getEnemy(){
         final Vector2 p = getRandomPositionOnWorld();
         float x = p.x;
         float y = p.y;
@@ -33,18 +90,22 @@ public class Factory {
 
         final Body body = createBody(x, y);
 
-        Fixture enemybody = createEnemyBody(body, radius);
+        Fixture enemybody = createEntityBody(body, radius);
 
         Fixture radarBody = createRadar(body);
 
-        Radar radar = new Radar();
+        RadarEnemy radar = new RadarEnemy();
         radarBody.setUserData(radar);
 
         Enemy enemy = new Enemy(body, radar);
 
-        radar.setEnemy(enemy);
+        radar.setEnt(enemy);
 
         enemybody.setUserData(enemy);
+
+        body.setUserData(Entity.Type.ENEMY);
+
+        EntityManager.add(enemy);
 
         return enemy;
 
@@ -52,7 +113,7 @@ public class Factory {
 
     private Fixture createRadar(final Body body){
         CircleShape shape = new CircleShape();
-        shape.setRadius(Radar.SIZE);
+        shape.setRadius(RadarEnemy.SIZE);
         FixtureDef fd = new FixtureDef();
         fd.isSensor = true;
         fd.shape = shape;
@@ -98,11 +159,13 @@ public class Factory {
 
         Body body = this.createBody(x, y);
 
-        Fixture fix = this.createEnemyBody(body, radius);
+        Fixture fix = this.createEntityBody(body, radius);
 
         Food food = new Food(body);
 
         fix.setUserData(food);
+
+        body.setUserData(Entity.Type.FOOD);
 
         EntityManager.add(food);
 
@@ -124,13 +187,22 @@ public class Factory {
         bd.type = BodyDef.BodyType.DynamicBody;
         bd.position.set(x, y);
 
-        final Body body = neat.getWorld().createBody(bd);
+        final World world = neat.getWorld();
+
+        Body body = null;
+        while(body == null){
+            if(world.isLocked()) {
+                System.out.println("isLocked");
+                continue;
+            }
+            body = world.createBody(bd);
+        }
 
         return body;
 
     }
 
-    private Fixture createEnemyBody(final Body body, float radius){
+    private Fixture createEntityBody(final Body body, float radius){
 
         CircleShape shape = new CircleShape();
         shape.setRadius(radius);
