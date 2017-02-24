@@ -1,4 +1,7 @@
-package com.github.jotask.neat.engine.entity;
+package com.github.jotask.neat.engine.radar;
+
+import com.github.jotask.neat.engine.entity.Enemy;
+import com.github.jotask.neat.engine.entity.Food;
 
 import java.util.LinkedList;
 
@@ -8,15 +11,11 @@ import java.util.LinkedList;
  * @author Jose Vives Iznardo
  * @since 15/02/2017
  */
-public class Radar {
-
-    public static final float SIZE = 7f;
+public class RadarEnemy extends Radar<Enemy>{
 
     public final LinkedList<Food> foods;
 
-    private Enemy enemy;
-
-    public Radar() {
+    public RadarEnemy() {
         this.foods = new LinkedList<Food>();
     }
 
@@ -26,21 +25,11 @@ public class Radar {
 
     public LinkedList<Food> getFoods() { return foods; }
 
-    public Enemy getEnemy() { return enemy; }
-
-    public void setEnemy(Enemy enemy) {
-        if(this.enemy != null) {
-            System.err.println("enemy is not null");
-            return;
-        }
-        this.enemy = enemy;
-    }
-
     public Food getClosest(){
         Food closest = null;
         float dst = Float.MAX_VALUE;
         for(Food f: foods){
-            float d = enemy.getBody().getPosition().dst(f.getBody().getPosition());
+            float d = this.getEnt().getBody().getPosition().dst(f.getBody().getPosition());
             if(d < dst){
                 closest = f;
                 dst = d;
