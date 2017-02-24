@@ -1,9 +1,12 @@
 package com.github.jotask.neat.engine.entity;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.github.jotask.neat.engine.Timer;
+import com.github.jotask.neat.engine.controller.EnemyController;
+import com.github.jotask.neat.engine.radar.RadarEnemy;
 
 /**
  * Enemy
@@ -13,7 +16,7 @@ import com.github.jotask.neat.engine.Timer;
  */
 public class Enemy extends Entity{
 
-    private float INIT_TIME = 3f;
+    private float INIT_TIME = 1f;
 
     private final EnemyController controller;
 
@@ -23,14 +26,17 @@ public class Enemy extends Entity{
 
     private final Timer timer;
 
-    private final Radar radar;
+    private final RadarEnemy radar;
 
-    public Enemy(final Body body, final Radar radar) {
+    public int score;
+
+    public Enemy(final Body body, final RadarEnemy radar) {
         super(body);
         this.radar = radar;
         this.controller = new EnemyController(this);
         this.velocity = new Vector2();
         this.timer = new Timer(INIT_TIME);
+        score = 0;
     }
 
     @Override
@@ -45,6 +51,9 @@ public class Enemy extends Entity{
         if(timer.isPassed()){
             this.die = true;
         }
+
+        score++;
+
     }
 
     public void eat(final Food food){
@@ -55,10 +64,11 @@ public class Enemy extends Entity{
 
     @Override
     public void debug(final ShapeRenderer sr){
+        sr.setColor(Color.RED);
         sr.circle(getBody().getPosition().x, getBody().getPosition().y, .5f, 20);
     }
 
     public EnemyController getController() { return controller; }
-    public Radar getRadar() { return radar; }
+    public RadarEnemy getRadar() { return radar; }
 
 }

@@ -12,6 +12,8 @@ import com.badlogic.gdx.physics.box2d.Body;
  */
 public abstract class Entity {
 
+    public enum Type{ ENEMY, PLAYER, FOOD }
+
     private final Body body;
 
     protected boolean die;
@@ -42,4 +44,7 @@ public abstract class Entity {
     public boolean isDie() { return die; }
 
     public Body getBody() { return body; }
+
+    public void kill(){ this.die = true; }
+
 }
