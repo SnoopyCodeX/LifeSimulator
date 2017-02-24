@@ -32,6 +32,9 @@ public class Player extends Entity{
 
     @Override
     public void update() {
+
+        controller.moveRandom();
+
         this.getBody().applyForceToCenter(this.velocity.scl(SPEED), true);
         velocity.setZero();
     }
