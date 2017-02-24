@@ -1,9 +1,10 @@
-package com.github.jotask.neat.engine.entity;
+package com.github.jotask.neat.engine.controller;
 
 import com.github.jotask.neat.engine.JRandom;
+import com.github.jotask.neat.engine.entity.Enemy;
 
 /**
- * EnemyController
+ * PlayerController
  *
  * @author Jose Vives Iznardo
  * @since 11/02/2017
