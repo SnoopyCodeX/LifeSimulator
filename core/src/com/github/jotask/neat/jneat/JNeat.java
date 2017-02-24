@@ -132,16 +132,17 @@ public class JNeat {
                 float x = minX;
                 float y = yInput;
                 yInput += Cell.SIZE;
-                graph.put(i, new Cell(x, y, neuron.value));
+                graph.put(i, new Cell(x, y, neuron.value, neuron.type));
             }else if(neuron.type == Neuron.Type.OUTPUT){
                 float x = maxX - Cell.SIZE;
                 float y = yOutput;
                 yOutput += Cell.SIZE;
-                graph.put(i, new Cell(x, y, neuron.value));
+                graph.put(i, new Cell(x, y, neuron.value, neuron.type));
             }else if(neuron.type == Neuron.Type.HIDDEN){
                 float x = (minX + maxX) / 2f;
                 float y = yM;
-                graph.put(i, new Cell(x, y, neuron.value));
+                graph.put(i, new Cell(x, y, neuron.value, neuron.type));
+                System.out.println("hidden");
             }else{
                 System.out.println("Unknown neuron type ");
             }
@@ -198,13 +199,15 @@ public class JNeat {
         private float x;
         private float y;
         private final double value;
+        private final Neuron.Type type;
 
         static float SIZE = 1f;
 
-        public Cell(final float x, final float y, final double value) {
+        public Cell(final float x, final float y, final double value, final Neuron.Type type) {
             this.x = x;
             this.y = y;
             this.value = value;
+            this.type = type;
         }
 
         public void render(final SpriteBatch sb){
@@ -219,7 +222,19 @@ public class JNeat {
             }else{
                 color = Color.RED;
             }
-            sr.setColor(Color.YELLOW);
+            switch (type){
+                case INPUT:
+                    sr.setColor(Color.YELLOW);
+                    break;
+                case HIDDEN:
+                    sr.setColor(Color.BLUE);
+                    break;
+                case OUTPUT:
+                    sr.setColor(Color.BROWN);
+                    break;
+                default:
+                    sr.setColor(Color.WHITE);
+            }
             sr.set(ShapeRenderer.ShapeType.Filled);
             sr.rect(this.x, this.y, SIZE, SIZE);
 
