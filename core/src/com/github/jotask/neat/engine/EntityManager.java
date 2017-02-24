@@ -3,6 +3,7 @@ package com.github.jotask.neat.engine;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.Neat;
+import com.github.jotask.neat.engine.entity.Enemy;
 import com.github.jotask.neat.engine.entity.Entity;
 import com.github.jotask.neat.engine.entity.Food;
 
@@ -23,25 +24,32 @@ public class EntityManager{
         return instance;
     }
 
-    public static boolean add(final Food entity){
+    public static boolean add(final Entity entity){
         if(instance == null)
             get();
 
         if(entity == null)
             return false;
 
+        if(entity instanceof Food){
+            instance.foods++;
+        }else if(entity instanceof Enemy){
+            instance.enemies++;
+        }
+
         return instance.entities.add(entity);
     }
 
-    private LinkedList<Food> entities;
+    private LinkedList<Entity> entities;
 
-    private EntityManager() {
-        this.entities = new LinkedList<Food>();
-    }
+    private int foods = 0;
+    private int enemies = 0;
+
+    private EntityManager() { this.entities = new LinkedList<Entity>(); }
 
     public void update() {
 
-        final LinkedList<Food> newPopulation = new LinkedList<Food>(entities);
+        final LinkedList<Entity> newPopulation = new LinkedList<Entity>(entities);
         int f = 0;
 
         for(Entity e: entities){
@@ -55,7 +63,10 @@ public class EntityManager{
                 Neat.get().getWorld().destroyBody(e.getBody());
 
                 if(e instanceof Food){
+                    instance.foods--;
                     f++;
+                }else if(e instanceof Enemy){
+                    instance.enemies--;
                 }
 
             }
@@ -81,6 +92,9 @@ public class EntityManager{
         EntityManager.instance = null;
     }
 
-    public LinkedList<Food> getEntities() { return entities; }
+    public LinkedList<Entity> getEntities() { return entities; }
+
+    public int getFoods() { return foods; }
+    public int getEnemies() { return enemies; }
 
 }

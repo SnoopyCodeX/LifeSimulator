@@ -11,11 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.github.jotask.neat.engine.*;
-import com.github.jotask.neat.engine.entity.Enemy;
-import com.github.jotask.neat.neat.JotaNeat;
-import com.github.jotask.neat.neat.JotaNeatRenderer;
-
-import java.util.LinkedList;
+import com.github.jotask.neat.jneat.JNeat;
 
 public class Neat extends ApplicationAdapter {
 
@@ -24,7 +20,6 @@ public class Neat extends ApplicationAdapter {
 
 	final Color b = Color.WHITE;
 
-	final int POPULATION = 5;
 	final int FOOD = 10;
 
 	SpriteBatch sb;
@@ -43,12 +38,7 @@ public class Neat extends ApplicationAdapter {
 
 	Factory factory;
 
-	JotaNeat jNeat;
-	Thread thread;
-
-	JotaNeatRenderer renderNeat;
-
-	LinkedList<Enemy> toDelete;
+	JNeat neat;
 	
 	@Override
 	public void create () {
@@ -75,17 +65,13 @@ public class Neat extends ApplicationAdapter {
 
 		factory.createWalls();
 
+		factory.getPlayer();
+
 		for(int i = 0; i < FOOD; i++){
 			factory.food();
 		}
 
-		toDelete = new LinkedList<Enemy>();
-
-		jNeat = new JotaNeat(this);
-		thread = new Thread(jNeat);
-		thread.start();
-
-		renderNeat = new JotaNeatRenderer(this, jNeat);
+		neat = new JNeat(this);
 
 	}
 
@@ -93,15 +79,9 @@ public class Neat extends ApplicationAdapter {
 
 	public void update(){
 		world.step(Gdx.graphics.getDeltaTime(), 6, 3);
+		neat.evaluate();
 		entityManager.update();
-		for(Enemy e: toDelete){
-			if(!(e.isDie())){
-				System.out.println("SomeError");
-				continue;
-			}
-			Neat.get().getWorld().destroyBody(e.getBody());
-		}
-		toDelete.clear();
+		neat.learn();
 	}
 
 	@Override
@@ -109,41 +89,47 @@ public class Neat extends ApplicationAdapter {
 		input();
 		update();
 		Gdx.gl.glClearColor(b.r, b.g, b.b, b.a);
+
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		Gdx.gl.glEnable(GL20.GL_BLEND);
 		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+
+		renderer.render(world, camera.combined);
+
 		sb.setProjectionMatrix(camera.combined);
+
 		sb.begin();
 		entityManager.render(sb);
 		sb.end();
-		renderer.render(world, camera.combined);
+
 		sr.setProjectionMatrix(camera.combined);
+
 		sr.begin();
 		sr.set(ShapeRenderer.ShapeType.Filled);
 		entityManager.debug(sr);
 		sr.end();
+
 		gui.render(sb);
-		renderNeat.render(sb, sr);
+
+		sb.begin();
+		sr.begin();
+		neat.render(sb, sr);
+		sr.end();
+		sb.end();
+
 	}
 	
 	@Override
 	public void dispose () {
-		jNeat.finish = true;
-		try {
-			thread.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-			thread.interrupt();
-		}
 		sb.dispose();
 		sr.dispose();
+		neat.dispose();
 		world.dispose();
 		EntityManager.get().dispose();
 		font.dispose();
 		Neat.instance = null;
 	}
-
-	public LinkedList<Enemy> getToDelete() { return toDelete; }
 
 	public World getWorld() { return world; }
 
@@ -151,5 +137,8 @@ public class Neat extends ApplicationAdapter {
 
 	public BitmapFont getFont() { return font; }
 
-	public JotaNeat getjNeat() { return jNeat; }
+	public JNeat getNeat() { return neat; }
+
+	public Camera getCamera() { return camera; }
+
 }

@@ -6,7 +6,8 @@ import com.badlogic.gdx.physics.box2d.ContactListener;
 import com.badlogic.gdx.physics.box2d.Manifold;
 import com.github.jotask.neat.engine.entity.Enemy;
 import com.github.jotask.neat.engine.entity.Food;
-import com.github.jotask.neat.engine.entity.Radar;
+import com.github.jotask.neat.engine.radar.Radar;
+import com.github.jotask.neat.engine.radar.RadarEnemy;
 
 /**
  * WorldController
@@ -28,7 +29,7 @@ public class WorldListener implements ContactListener {
         if(a instanceof Enemy && b instanceof Enemy)
             return;
 
-        if((a instanceof Radar && b instanceof Enemy) || (b instanceof Radar && a instanceof Enemy))
+        if((a instanceof RadarEnemy && b instanceof Enemy) || (b instanceof RadarEnemy && a instanceof Enemy))
             return;
 
         if(a instanceof Food && b instanceof Food)
@@ -39,7 +40,7 @@ public class WorldListener implements ContactListener {
 
         Enemy enemy = null;
         Food food = null;
-        Radar radar = null;
+        RadarEnemy radar = null;
 
         if(a instanceof Enemy){
             enemy = (Enemy) a;
@@ -51,10 +52,10 @@ public class WorldListener implements ContactListener {
         }else if(b instanceof Food){
             food = (Food) b;
         }
-        if(a instanceof Radar){
-            radar = (Radar) a;
-        }else if(b instanceof Radar){
-            radar = (Radar) b;
+        if(a instanceof RadarEnemy){
+            radar = (RadarEnemy) a;
+        }else if(b instanceof RadarEnemy){
+            radar = (RadarEnemy) b;
         }
 
         if(radar != null && food != null){
@@ -64,7 +65,8 @@ public class WorldListener implements ContactListener {
             enemy.eat(food);
             return;
         }else {
-            System.out.println("unknown collision: a:" + a.getClass().getSimpleName() + " b: " + b.getClass().getSimpleName());
+            // TODO
+//            System.out.println("unknown collision: a:" + a.getClass().getSimpleName() + " b: " + b.getClass().getSimpleName());
         }
 
     }
@@ -89,24 +91,25 @@ public class WorldListener implements ContactListener {
             return;
 
         Food food = null;
-        Radar radar = null;
+        RadarEnemy radar = null;
 
         if(a instanceof Food){
             food = (Food) a;
         }else if(b instanceof Food){
             food = (Food) b;
         }
-        if(a instanceof Radar){
-            radar = (Radar) a;
-        }else if(b instanceof Radar){
-            radar = (Radar) b;
+        if(a instanceof RadarEnemy){
+            radar = (RadarEnemy) a;
+        }else if(b instanceof RadarEnemy){
+            radar = (RadarEnemy) b;
         }
 
         if(radar != null && food != null){
             radar.outRange(food);
             return;
         }else {
-            System.out.println("unknown collision endContact: a:" + a.getClass().getSimpleName() + " b: " + b.getClass().getSimpleName());
+            // TODO
+//            System.out.println("unknown collision endContact: a:" + a.getClass().getSimpleName() + " b: " + b.getClass().getSimpleName());
         }
     }
 
