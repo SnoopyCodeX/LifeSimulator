@@ -1,7 +1,9 @@
 package com.github.jotask.neat.jneat;
 
+import static com.github.jotask.neat.jneat.Population.isOutput;
+
 // A synapse is a link between two neurons
-public class Synapse {
+public class Synapse{
 
     public int input = 0;
     public int output = 0;
@@ -19,5 +21,7 @@ public class Synapse {
         synapse.innovation = this.innovation;
         return synapse;
     }
+
+    public boolean isOut(){ return(isOutput(this.input) && isOutput(this.output)); }
 
 }

@@ -1,5 +1,7 @@
 package com.github.jotask.neat.jneat;
 
+import com.github.jotask.neat.jneat.neurons.Output;
+
 import java.util.*;
 
 import static com.github.jotask.neat.jneat.JNeat.random;
@@ -10,15 +12,12 @@ import static com.github.jotask.neat.jneat.JNeat.random;
  * @author Jose Vives Iznardo
  * @since 15/02/2017
  */
-public class Pool {
-
-    public Pool(){}
+public class Population {
 
     public static final int POPULATION    = 50;
     public static final int STALE_SPECIES = 15;
     public static final int INPUTS        = 5;
-    public static final int OUTPUTS       = 4;
-    public static final int TIMEOUT       = 20;
+    public static final int OUTPUTS       = Output.OUTPUT.values().length;
 
     public static final double DELTA_DISJOINT  = 2.0;
     public static final double DELTA_WEIGHTS   = 0.4;
@@ -38,6 +37,28 @@ public class Pool {
     public int generation = 0;
     public static int innovation = OUTPUTS;
     public double maxFitness = 0.0;
+
+    public Population(){
+        for (int i = 0; i < POPULATION; ++i) {
+            final Genome basic = new Genome();
+            addToSpecies(basic);
+            basic.maxNeuron = INPUTS;
+            basic.mutate();
+        }
+//        check();
+    }
+
+    private void check(){
+        for(Species s: species){
+            for(Genome g: s.genomes){
+                for(Synapse l: g.genes){
+                    if(l.isOut()){
+                        throw new RuntimeException("Two outputs neurons connected");
+                    }
+                }
+            }
+        }
+    }
 
     public void addToSpecies(final Genome child) {
 
@@ -73,39 +94,36 @@ public class Pool {
         }
     }
 
-    void initializePool() {
-        for (int i = 0; i < POPULATION; ++i) {
-            final Genome basic = new Genome();
-            basic.maxNeuron = INPUTS;
-            basic.mutate();
-            addToSpecies(basic);
-        }
-    }
-
     void newGeneration() {
         cullSpecies(false);
         rankGlobally();
         removeStaleSpecies();
         rankGlobally();
-        for (final Species species : this.species)
+        for (final Species species : this.species){
             species.calculateAverageFitness();
+        }
         removeWeakSpecies();
+
         final double sum = totalAverageFitness();
         final List<Genome> children = new ArrayList<Genome>();
         for (final Species species : this.species) {
-            final double breed = Math
-                    .floor(species.averageFitness / sum * POPULATION) - 1.0;
+            final double breed = Math.floor(species.averageFitness / sum * POPULATION) - 1.0;
             for (int i = 0; i < breed; ++i)
                 children.add(species.breedChild());
         }
+
         cullSpecies(true);
+
         while (children.size() + species.size() < POPULATION) {
             final Species species = this.species.get(random.nextInt(this.species.size()));
             children.add(species.breedChild());
         }
+
         for (final Genome child : children)
             addToSpecies(child);
+
         ++generation;
+
     }
 
     private void rankGlobally() {
@@ -159,8 +177,7 @@ public class Pool {
 
         final double sum = totalAverageFitness();
         for (final Species species : this.species) {
-            final double breed = Math
-                    .floor(species.averageFitness / sum * POPULATION);
+            final double breed = Math.floor(species.averageFitness / sum * POPULATION);
             if (breed >= 1.0)
                 survived.add(species);
         }
@@ -175,4 +192,8 @@ public class Pool {
             total += species.averageFitness;
         return total;
     }
+
+    public static boolean isInput(final int id){ return id < INPUTS; }
+    public static boolean isOutput(final int id){ return id >= INPUTS && id < INPUTS + OUTPUTS; }
+
 }
