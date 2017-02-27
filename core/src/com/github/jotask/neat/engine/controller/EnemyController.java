@@ -19,12 +19,12 @@ public class EnemyController {
 
     public void moveRandom(){ enemy.velocity.set(JRandom.getDir()); }
 
-    public void left(){ enemy.velocity.set(-1, 0); }
+    public void left(){ enemy.velocity.add(-1, 0); }
 
-    public void right(){ enemy.velocity.set(1, 0); }
+    public void right(){ enemy.velocity.add(1, 0); }
 
-    public void up(){ enemy.velocity.set(0, 1); }
+    public void up(){ enemy.velocity.add(0, 1); }
 
-    public void down(){ enemy.velocity.set(0, -1); }
+    public void down(){ enemy.velocity.add(0, -1); }
 
 }
