@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.jotask.neat.jneat.JNeat.random;
-import static com.github.jotask.neat.jneat.Pool.CROSSOVER;
+import static com.github.jotask.neat.jneat.Population.CROSSOVER;
 
 public class Species {
 

@@ -1,15 +1,12 @@
 package com.github.jotask.neat.jneat;
 
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.Neat;
 
-import java.util.*;
-
-import static com.github.jotask.neat.jneat.Pool.INPUTS;
-import static com.github.jotask.neat.jneat.Pool.OUTPUTS;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * JNeat
@@ -19,7 +16,7 @@ import static com.github.jotask.neat.jneat.Pool.OUTPUTS;
  */
 public class JNeat {
 
-    public static final float THRESHOLD = .5f;
+    public static final float THRESHOLD = .75f;
 
     final Neat neat;
 
@@ -27,7 +24,7 @@ public class JNeat {
 
     public static final Random random = new Random();
 
-    private final Pool pool;
+    private final Population pool;
 
     private NeatEnemy best;
 
@@ -39,8 +36,7 @@ public class JNeat {
         this.neat = neat;
         this.entities = new ArrayList<NeatEnemy>();
         this.ticks = 0;
-        this.pool = new Pool();
-        this.pool.initializePool();
+        this.pool = new Population();
         init();
     }
 
@@ -71,7 +67,8 @@ public class JNeat {
 
     public void learn(){
 
-        best = entities.get(0);
+        this.setBest(entities.get(0));
+
         boolean allDead = true;
 
         alive = entities.size();
@@ -94,155 +91,30 @@ public class JNeat {
                 pool.maxFitness = fitness;
 
             if (fitness > best.getGenome().fitness)
-                best = entities;
+                this.setBest(entities);
         }
 
         if (allDead) {
             pool.newGeneration();
             init();
         }
+
+    }
+
+    private void setBest(final NeatEnemy e){
+
+        if(best!= null)
+            best.isBest = false;
+
+        best = e;
+
+        best.isBest = true;
+
     }
 
     public void render(final SpriteBatch sb, final ShapeRenderer sr){
 
-        final float minX;
-        final float maxX;
-
-        final float xM;
-        final float yM;
-
-        {
-            final Camera c = neat.getCamera();
-            minX = c.position.x - c.viewportWidth / 2f;
-            maxX = c.position.x + c.viewportWidth / 2f;
-
-            xM = c.position.x;
-            yM = c.position.y;
-        }
-
-        float yInput = -(INPUTS * Cell.SIZE) / 2f;
-        float yOutput = -(OUTPUTS * Cell.SIZE) / 2f;
-
-        final Map<Integer, Cell> graph = new HashMap<Integer, Cell>();
-        for(final Map.Entry<Integer, Neuron> entry : best.getGenome().network.entrySet()){
-            final int i = entry.getKey();
-            final Neuron neuron = entry.getValue();
-
-            if(neuron.type == Neuron.Type.INPUT){
-                float x = minX;
-                float y = yInput;
-                yInput += Cell.SIZE;
-                graph.put(i, new Cell(x, y, neuron.value, neuron.type));
-            }else if(neuron.type == Neuron.Type.OUTPUT){
-                float x = maxX - Cell.SIZE;
-                float y = yOutput;
-                yOutput += Cell.SIZE;
-                graph.put(i, new Cell(x, y, neuron.value, neuron.type));
-            }else if(neuron.type == Neuron.Type.HIDDEN){
-                float x = (minX + maxX) / 2f;
-                float y = yM;
-                graph.put(i, new Cell(x, y, neuron.value, neuron.type));
-                System.out.println("hidden");
-            }else{
-                System.out.println("Unknown neuron type ");
-            }
-        }
-
-        for(final Synapse gene: best.getGenome().genes){
-            final Cell c1 = graph.get(gene.input);
-            final Cell c2 = graph.get(gene.output);
-            if (gene.input >= INPUTS + OUTPUTS) {
-                c1.x = (int) (0.75 * c1.x + 0.25 * c2.x);
-                if (c1.x >= c2.x) c1.x = c1.x - 60;
-                if (c1.x < minX)  c1.x = minX;
-                if (c1.x > maxX)  c1.x = maxX;
-                c1.y = (int) (0.75 * c1.y + 0.25 * c2.y);
-            }
-            if (gene.output >= INPUTS + OUTPUTS) {
-                c2.x = (int) (0.25 * c1.x + 0.75 * c2.x);
-                if (c1.x >= c2.x) c2.x = c2.x + 60;
-                if (c2.x < minX)  c2.x = minX;
-                if (c2.x > maxX)  c2.x = maxX;
-                c2.y = (int) (0.25 * c1.y + 0.75 * c2.y);
-            }
-        }
-
-        sr.set(ShapeRenderer.ShapeType.Filled);
-
-        for(Cell cell: graph.values()){
-            cell.render(sb);
-            cell.debug(sr);
-        }
-
-        for (final Synapse gene : best.getGenome().genes) {
-
-            if (gene.enabled) {
-                final Cell c1 = graph.get(gene.input);
-                final Cell c2 = graph.get(gene.output);
-                final float value = (float) Math.abs(Neuron.sigmoid(gene.weight));
-                final Color color;
-                if (Neuron.sigmoid(gene.weight) > 0.0) {
-                    color = Color.GREEN;
-                }else {
-                    color = Color.RED;
-                }
-                sr.setColor(color);
-                float off = Cell.SIZE / 2f;
-                sr.line(c1.x + off, c1.y + off, c2.x + off, c2.y + off);
-            }
-        }
-
-    }
-
-    private static class Cell {
-
-        private float x;
-        private float y;
-        private final double value;
-        private final Neuron.Type type;
-
-        static float SIZE = 1f;
-
-        public Cell(final float x, final float y, final double value, final Neuron.Type type) {
-            this.x = x;
-            this.y = y;
-            this.value = value;
-            this.type = type;
-        }
-
-        public void render(final SpriteBatch sb){
-
-        }
-
-        public void debug(final ShapeRenderer sr){
-            final double value = this.value;
-            final Color color;
-            if(value > 0.0){
-                color = Color.GREEN;
-            }else{
-                color = Color.RED;
-            }
-            switch (type){
-                case INPUT:
-                    sr.setColor(Color.YELLOW);
-                    break;
-                case HIDDEN:
-                    sr.setColor(Color.BLUE);
-                    break;
-                case OUTPUT:
-                    sr.setColor(Color.BROWN);
-                    break;
-                default:
-                    sr.setColor(Color.WHITE);
-            }
-            sr.set(ShapeRenderer.ShapeType.Filled);
-            sr.rect(this.x, this.y, SIZE, SIZE);
-
-            sr.setColor(Color.BLACK);
-            sr.set(ShapeRenderer.ShapeType.Line);
-            sr.rect(this.x, this.y, SIZE, SIZE);
-
-        }
+        best.drawNetwork(neat.getCamera(), sb, sr);
 
     }
 
@@ -251,5 +123,7 @@ public class JNeat {
     }
 
     public int getAlive(){ return this.alive; }
+
+    public int getGeneration() { return this.pool.generation; }
 
 }
