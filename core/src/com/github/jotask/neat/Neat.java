@@ -13,6 +13,8 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.github.jotask.neat.engine.*;
 import com.github.jotask.neat.jneat.JNeat;
 
+import static com.badlogic.gdx.Gdx.gl;
+
 public class Neat extends ApplicationAdapter {
 
 	private static Neat instance;
@@ -65,7 +67,7 @@ public class Neat extends ApplicationAdapter {
 
 		factory.createWalls();
 
-		factory.getPlayer();
+//		factory.getPlayer();
 
 		for(int i = 0; i < FOOD; i++){
 			factory.food();
@@ -88,12 +90,9 @@ public class Neat extends ApplicationAdapter {
 	public void render () {
 		input();
 		update();
-		Gdx.gl.glClearColor(b.r, b.g, b.b, b.a);
+		gl.glClearColor(b.r, b.g, b.b, b.a);
 
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		Gdx.gl.glEnable(GL20.GL_BLEND);
-		Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-
+		gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
 		renderer.render(world, camera.combined);
 
@@ -110,13 +109,18 @@ public class Neat extends ApplicationAdapter {
 		entityManager.debug(sr);
 		sr.end();
 
-		gui.render(sb);
+		gl.glEnable(GL20.GL_BLEND);
+		gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
 		sb.begin();
 		sr.begin();
 		neat.render(sb, sr);
 		sr.end();
 		sb.end();
+
+		gl.glDisable(GL20.GL_BLEND);
+
+		gui.render(sb);
 
 	}
 	
