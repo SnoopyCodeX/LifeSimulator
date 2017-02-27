@@ -64,7 +64,7 @@ public class Factory {
         RadarEnemy radar = new RadarEnemy();
         radarBody.setUserData(radar);
 
-        NeatEnemy enemy = new NeatEnemy(body, radar, genome, species);
+        NeatEnemy enemy = new NeatEnemy(body, radar, genome);
 
         radar.setEnt(enemy);
 
