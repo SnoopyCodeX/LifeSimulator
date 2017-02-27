@@ -1,6 +1,6 @@
 package com.github.jotask.neat.engine.radar;
 
-import com.github.jotask.neat.engine.entity.Food;
+import com.github.jotask.neat.engine.entity.Enemy;
 import com.github.jotask.neat.engine.entity.Player;
 
 import java.util.LinkedList;
@@ -13,25 +13,25 @@ import java.util.LinkedList;
  */
 public class RadarPlayer extends Radar<Player>{
 
-    public final LinkedList<Food> foods;
+    public final LinkedList<Enemy> enemies;
 
     public RadarPlayer() {
-        this.foods = new LinkedList<Food>();
+        this.enemies = new LinkedList<Enemy>();
     }
 
-    public void inRange(final Food food){ this.foods.add(food); }
+    public void inRange(final Enemy e){ this.enemies.add(e); }
 
-    public void outRange(final Food food){ this.foods.remove(food); }
+    public void outRange(final Enemy e){ this.enemies.remove(e); }
 
-    public LinkedList<Food> getFoods() { return foods; }
+    public LinkedList<Enemy> getFoods() { return enemies; }
 
-    public Food getClosest(){
-        Food closest = null;
+    public Enemy getClosest(){
+        Enemy closest = null;
         float dst = Float.MAX_VALUE;
-        for(Food f: foods){
-            float d = this.getEnt().getBody().getPosition().dst(f.getBody().getPosition());
+        for(Enemy e: enemies){
+            float d = this.getEnt().getBody().getPosition().dst(e.getBody().getPosition());
             if(d < dst){
-                closest = f;
+                closest = e;
                 dst = d;
             }
         }

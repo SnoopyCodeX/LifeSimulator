@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.github.jotask.neat.engine.JRandom;
 import com.github.jotask.neat.engine.controller.PlayerController;
 import com.github.jotask.neat.engine.radar.RadarPlayer;
 
@@ -44,4 +45,10 @@ public class Player extends Entity{
         sr.setColor(Color.LIME);
         sr.circle(getBody().getPosition().x, getBody().getPosition().y, .5f, 20);
     }
+
+    public void respawn(){
+        Vector2 p = JRandom.randomPosition();
+        this.getBody().setTransform(p, this.getBody().getAngle());
+    }
+
 }

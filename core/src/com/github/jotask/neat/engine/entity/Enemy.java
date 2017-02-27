@@ -28,15 +28,12 @@ public class Enemy extends Entity{
 
     private final RadarEnemy radar;
 
-    public int score;
-
     public Enemy(final Body body, final RadarEnemy radar) {
         super(body);
         this.radar = radar;
         this.controller = new EnemyController(this);
         this.velocity = new Vector2();
         this.timer = new Timer(INIT_TIME);
-        score = 0;
     }
 
     @Override
@@ -51,8 +48,6 @@ public class Enemy extends Entity{
         if(timer.isPassed()){
             this.die = true;
         }
-
-        score++;
 
     }
 

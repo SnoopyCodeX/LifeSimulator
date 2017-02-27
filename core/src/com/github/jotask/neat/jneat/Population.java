@@ -16,7 +16,7 @@ public class Population {
 
     public static final int POPULATION    = 50;
     public static final int STALE_SPECIES = 15;
-    public static final int INPUTS        = 5;
+    public static final int INPUTS        = 4;
     public static final int OUTPUTS       = Output.OUTPUT.values().length;
 
     public static final double DELTA_DISJOINT  = 2.0;

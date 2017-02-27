@@ -3,12 +3,14 @@ package com.github.jotask.neat.engine;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.engine.entity.*;
+import com.github.jotask.neat.engine.entity.Enemy;
+import com.github.jotask.neat.engine.entity.Entity;
+import com.github.jotask.neat.engine.entity.Food;
+import com.github.jotask.neat.engine.entity.Player;
 import com.github.jotask.neat.engine.radar.RadarEnemy;
 import com.github.jotask.neat.engine.radar.RadarPlayer;
 import com.github.jotask.neat.jneat.Genome;
 import com.github.jotask.neat.jneat.NeatEnemy;
-import com.github.jotask.neat.jneat.Species;
 
 /**
  * Factory
@@ -45,12 +47,15 @@ public class Factory {
 
         EntityManager.add(player);
 
+        CollisionFilter.setMask(playerBody, CollisionFilter.EENTITY.PLAYER);
+        CollisionFilter.setMask(radarBody, CollisionFilter.EENTITY.PLAYER_RADAR);
+
         return player;
 
 
     }
 
-    public final NeatEnemy getNeatEnemy(final Genome genome, final Species species){
+    public final NeatEnemy getNeatEnemy(final Genome genome){
 
         final Vector2 p = getRandomPositionOnWorld();
         float radius = .5f;
@@ -73,6 +78,9 @@ public class Factory {
         enemybody.setUserData(enemy);
 
         EntityManager.add(enemy);
+
+        CollisionFilter.setMask(enemybody, CollisionFilter.EENTITY.ENEMY);
+        CollisionFilter.setMask(radarBody, CollisionFilter.EENTITY.ENEMY_RADAR);
 
         return enemy;
 
@@ -142,6 +150,8 @@ public class Factory {
         shape.createLoop(vertices);
         FixtureDef fd = new FixtureDef();
         fd.shape = shape;
+
+        CollisionFilter.setMask(fd, CollisionFilter.EENTITY.WALLS);
 
         body.createFixture(fd);
 

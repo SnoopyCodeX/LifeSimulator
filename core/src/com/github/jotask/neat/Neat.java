@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.github.jotask.neat.engine.*;
+import com.github.jotask.neat.engine.entity.Player;
 import com.github.jotask.neat.jneat.JNeat;
 
 import static com.badlogic.gdx.Gdx.gl;
@@ -41,6 +42,8 @@ public class Neat extends ApplicationAdapter {
 	Factory factory;
 
 	JNeat neat;
+
+	private Player player;
 	
 	@Override
 	public void create () {
@@ -67,11 +70,7 @@ public class Neat extends ApplicationAdapter {
 
 		factory.createWalls();
 
-//		factory.getPlayer();
-
-		for(int i = 0; i < FOOD; i++){
-			factory.food();
-		}
+		player = factory.getPlayer();
 
 		neat = new JNeat(this);
 
@@ -144,5 +143,7 @@ public class Neat extends ApplicationAdapter {
 	public JNeat getNeat() { return neat; }
 
 	public Camera getCamera() { return camera; }
+
+	public Player getPlayer() { return player; }
 
 }

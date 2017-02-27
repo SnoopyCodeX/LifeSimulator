@@ -6,8 +6,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.github.jotask.neat.Neat;
 import com.github.jotask.neat.engine.entity.Enemy;
-import com.github.jotask.neat.engine.entity.Food;
 import com.github.jotask.neat.engine.radar.RadarEnemy;
 import com.github.jotask.neat.jneat.neurons.Hidden;
 import com.github.jotask.neat.jneat.neurons.Input;
@@ -34,11 +34,14 @@ public class NeatEnemy extends Enemy {
 
     public boolean isBest;
 
+    private float score;
+
     public NeatEnemy(final Body body, final RadarEnemy radar, final Genome genome) {
         super(body, radar);
         this.genome = genome;
         this.genome.generateNetwork();
         v = new Vector2();
+        this.score = 0f;
     }
 
     public Genome getGenome() { return genome; }
@@ -47,16 +50,9 @@ public class NeatEnemy extends Enemy {
         final double[] inputs = new double[Population.INPUTS];
         inputs[0] = this.getBody().getPosition().x;
         inputs[1] = this.getBody().getPosition().y;
-        Food food = getRadar().getClosest();
-        // true = 1 and false = 0
-        inputs[2] = (food == null) ? 1 : 0;
-        if(food != null) {
-            inputs[3] = food.getBody().getPosition().y;
-            inputs[4] = food.getBody().getPosition().y;
-        }else{
-            inputs[3] = 0;
-            inputs[4] = 0;
-        }
+        final Vector2 p = Neat.get().getPlayer().getBody().getPosition();
+        inputs[2] = p.x;
+        inputs[3] = p.y;
         return inputs;
     }
 
@@ -208,4 +204,10 @@ public class NeatEnemy extends Enemy {
         }
     }
 
+    public float getScore() {
+        final Vector2 e = this.getBody().getPosition();
+        final Vector2 p = Neat.get().getPlayer().getBody().getPosition();
+        score = e.dst2(p);
+        return score;
+    }
 }

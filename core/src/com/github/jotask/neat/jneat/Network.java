@@ -31,8 +31,6 @@ public class Network {
             network.put(INPUTS + i, new Output(INPUTS + i));
         }
 
-//        System.out.println("-------------");
-
         Collections.sort(genes, new Comparator<Synapse>() {
             @Override
             public int compare(final Synapse o1, final Synapse o2) { return o1.output - o2.output; }
@@ -40,18 +38,10 @@ public class Network {
 
         for (final Synapse gene : genes) {
 
-            if (gene.isOut()) {
-//                System.out.println("continue; " + gene.input + " : " + gene.output);
-            }
-
             if (gene.enabled) {
 
                 if (!network.containsKey(gene.output))
                     network.put(gene.output, new Hidden(gene.output));
-
-                if (gene.isOut()) {
-//                    System.out.println();
-                }
 
                 final Neuron neuron = network.get(gene.output);
                 neuron.inputs.add(gene);
@@ -79,10 +69,6 @@ public class Network {
     public void evaluate() {
 
         for (final Map.Entry<Integer, Neuron> entry : network.entrySet()) {
-
-//            if (entry.getKey() < INPUTS + OUTPUTS) {
-//                continue;
-//            }
 
             final Neuron neuron = entry.getValue();
 
@@ -122,7 +108,10 @@ public class Network {
             throw new RuntimeException("IS NOT OUTPUT: " + id);
         }
         Neuron n = this.network.get(id);
-        return n;
+        if(n instanceof Output){
+            return n;
+        }
+        throw new RuntimeException("IS NOT OUTPUT: " + id);
     }
 
     private Neuron getInput(final int i){
@@ -130,7 +119,10 @@ public class Network {
             throw new RuntimeException("IS NOT INPUT: " + i);
         }
         Neuron n = this.network.get(i);
-        return n;
+        if(n instanceof Input) {
+            return n;
+        }
+        throw new RuntimeException("IS NOT INPUT: " + i);
     }
 
     public Set<Map.Entry<Integer, Neuron>> entrySet() { return this.network.entrySet(); }

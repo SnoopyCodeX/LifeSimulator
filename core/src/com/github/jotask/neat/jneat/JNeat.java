@@ -46,7 +46,7 @@ public class JNeat {
         for(final Species species: pool.species){
             for(final Genome genome: species.genomes){
                 genome.generateNetwork();
-                NeatEnemy entity = neat.getFactory().getNeatEnemy(genome, species);
+                NeatEnemy entity = neat.getFactory().getNeatEnemy(genome);
                 this.entities.add(entity);
             }
         }
@@ -83,7 +83,7 @@ public class JNeat {
             allDead = false;
 
             // TODO improve fitness
-            double fitness = ticks++ - entities.score * 1.5;
+            double fitness = ticks++ - entities.getScore() * 1.5;
             fitness = fitness == 0.0 ? -1.0 : fitness;
 
             entities.getGenome().fitness = fitness;
@@ -97,6 +97,7 @@ public class JNeat {
         if (allDead) {
             pool.newGeneration();
             init();
+            Neat.get().getPlayer().respawn();
         }
 
     }

@@ -28,4 +28,12 @@ public final class JRandom {
         return new Vector2(x, y);
     }
 
+    public static Vector2 randomPosition(){
+        final float WIDTH = 21f / 2f;
+        final float HEIGHT = 11f / 2f;
+        float x = random(-WIDTH, WIDTH);
+        float y = random(-HEIGHT, HEIGHT);
+        return new Vector2(x, y);
+    }
+
 }
