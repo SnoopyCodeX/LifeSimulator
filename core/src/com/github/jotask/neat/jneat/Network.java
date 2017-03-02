@@ -1,5 +1,7 @@
 package com.github.jotask.neat.jneat;
 
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
 import com.github.jotask.neat.jneat.neurons.Hidden;
 import com.github.jotask.neat.jneat.neurons.Input;
 import com.github.jotask.neat.jneat.neurons.Neuron;
@@ -7,7 +9,10 @@ import com.github.jotask.neat.jneat.neurons.Output;
 
 import java.util.*;
 
-import static com.github.jotask.neat.jneat.Population.*;
+import static com.github.jotask.neat.jneat.Constants.INPUTS;
+import static com.github.jotask.neat.jneat.Constants.OUTPUTS;
+import static com.github.jotask.neat.jneat.NeatUtil.isOutput;
+import static com.github.jotask.neat.jneat.NeatUtil.isInput;
 
 /**
  * Network
@@ -15,7 +20,7 @@ import static com.github.jotask.neat.jneat.Population.*;
  * @author Jose Vives Iznardo
  * @since 27/02/2017
  */
-public class Network {
+public class Network implements Json.Serializable{
 
     final HashMap<Integer, Neuron> network;
 
@@ -31,10 +36,7 @@ public class Network {
             network.put(INPUTS + i, new Output(INPUTS + i));
         }
 
-        Collections.sort(genes, new Comparator<Synapse>() {
-            @Override
-            public int compare(final Synapse o1, final Synapse o2) { return o1.output - o2.output; }
-        });
+        Collections.sort(genes);
 
         for (final Synapse gene : genes) {
 
@@ -114,6 +116,21 @@ public class Network {
         throw new RuntimeException("IS NOT OUTPUT: " + id);
     }
 
+    public Neuron getHidden(final int id){
+        if(isOutput(id)){
+            throw new RuntimeException("IS OUTPUT: " + id);
+        }else if(isInput(id)){
+            throw new RuntimeException("IS Input: " + id);
+        }
+        Neuron n = this.network.get(id);
+        if(!(n instanceof Hidden)){
+            return n;
+        }
+        throw new RuntimeException("IS NOT HIDDEN: " + id);
+    }
+
+    public Neuron getNeuron(final int id){ return this.network.get(id); }
+
     private Neuron getInput(final int i){
         if(!isInput(i)){
             throw new RuntimeException("IS NOT INPUT: " + i);
@@ -125,6 +142,26 @@ public class Network {
         throw new RuntimeException("IS NOT INPUT: " + i);
     }
 
+    public LinkedList<Neuron> getOutputsNeurons(){
+        final LinkedList<Neuron> out = new LinkedList<Neuron>();
+        for (int i = 0; i < OUTPUTS; i++){
+            out.add(this.network.get(INPUTS + i));
+        }
+
+        for(Neuron n: out){
+            if(!(n instanceof Output)){
+                throw new RuntimeException("All nodes they aren't outputs");
+            }
+        }
+
+        return out;
+    }
+
     public Set<Map.Entry<Integer, Neuron>> entrySet() { return this.network.entrySet(); }
 
+    @Override
+    public void write(Json json) { }
+
+    @Override
+    public void read(Json json, JsonValue jsonData) { }
 }

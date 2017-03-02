@@ -10,7 +10,7 @@ import com.badlogic.gdx.physics.box2d.Body;
  */
 public class Food extends Entity{
 
-    private float value = 3f;
+    private static final float VALUE = 3f;
 
     public Food(Body body) {
         super(body);
@@ -18,6 +18,6 @@ public class Food extends Entity{
 
     public void eaten(){ this.die = true; }
 
-    public float getValue() { return value; }
+    public float getValue() { return Food.VALUE; }
 
 }

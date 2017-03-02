@@ -1,10 +1,14 @@
 package com.github.jotask.neat.jneat;
 
-import com.github.jotask.neat.jneat.neurons.Output;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import static com.github.jotask.neat.jneat.JNeat.random;
+import static com.github.jotask.neat.engine.JRandom.random;
+import static com.github.jotask.neat.jneat.Constants.*;
 
 /**
  * NeatAlgorithm
@@ -12,40 +16,22 @@ import static com.github.jotask.neat.jneat.JNeat.random;
  * @author Jose Vives Iznardo
  * @since 15/02/2017
  */
-public class Population {
-
-    public static final int POPULATION    = 50;
-    public static final int STALE_SPECIES = 15;
-    public static final int INPUTS        = 4;
-    public static final int OUTPUTS       = Output.OUTPUT.values().length;
-
-    public static final double DELTA_DISJOINT  = 2.0;
-    public static final double DELTA_WEIGHTS   = 0.4;
-    public static final double DELTA_THRESHOLD = 1.0;
-
-    public static final double CONN_MUTATION    = 0.25;
-    public static final double LINK_MUTATION    = 2.0;
-    public static final double BIAS_MUTATION    = 0.4;
-    public static final double NODE_MUTATION    = 0.5;
-    public static final double ENABLE_MUTATION  = 0.2;
-    public static final double DISABLE_MUTATION = 0.4;
-    public static final double STEP_SIZE        = 0.1;
-    public static final double PERTURBATION     = 0.9;
-    public static final double CROSSOVER        = 0.75;
+public class Population implements Json.Serializable{
 
     public final List<Species> species = new ArrayList<Species>();
     public int generation = 0;
     public static int innovation = OUTPUTS;
     public double maxFitness = 0.0;
 
-    public Population(){
+    public Population(){ }
+
+    public void init(){
         for (int i = 0; i < POPULATION; ++i) {
             final Genome basic = new Genome();
             addToSpecies(basic);
-            basic.maxNeuron = INPUTS;
+//            basic.maxNeuron = INPUTS;
             basic.mutate();
         }
-//        check();
     }
 
     private void check(){
@@ -62,11 +48,12 @@ public class Population {
 
     public void addToSpecies(final Genome child) {
 
-        for (final Species species : this.species)
+        for (final Species species : this.species) {
             if (child.sameSpecies(species.genomes.get(0))) {
                 species.genomes.add(child);
                 return;
             }
+        }
 
         final Species childSpecies = new Species();
         childSpecies.genomes.add(child);
@@ -76,14 +63,8 @@ public class Population {
 
     private void cullSpecies(final boolean cutToOne) {
         for (final Species species : this.species) {
-            Collections.sort(species.genomes, new Comparator<Genome>() {
 
-                @Override
-                public int compare(final Genome o1, final Genome o2) {
-                    final double cmp = o2.fitness - o1.fitness;
-                    return cmp == 0.0 ? 0 : cmp > 0.0 ? 1 : -1;
-                }
-            });
+            Collections.sort(species.genomes);
 
             double remaining = Math.ceil(species.genomes.size() / 2.0);
             if (cutToOne)
@@ -95,34 +76,58 @@ public class Population {
     }
 
     void newGeneration() {
+
+        // FIXME loosing too many species over the time
+
         cullSpecies(false);
         rankGlobally();
         removeStaleSpecies();
         rankGlobally();
+
         for (final Species species : this.species){
             species.calculateAverageFitness();
         }
+
+        // TODO loosing species here
         removeWeakSpecies();
 
         final double sum = totalAverageFitness();
+
         final List<Genome> children = new ArrayList<Genome>();
         for (final Species species : this.species) {
             final double breed = Math.floor(species.averageFitness / sum * POPULATION) - 1.0;
-            for (int i = 0; i < breed; ++i)
-                children.add(species.breedChild());
+            for (int i = 0; i < breed; ++i) {
+                Genome breedChild = species.breedChild();
+                children.add(breedChild);
+            }
         }
 
         cullSpecies(true);
+
+        // FIXME some time species is zero
+//        int m = POPULATION - (children.size() + species.size());
+//        int s = species.size();
+
+//        System.out.println("adding " + m + " species. ");
+//        System.out.println("Species: " + species.size() + " Children's: " + children.size());
+
+        if(this.species.isEmpty()){
+            throw new RuntimeException("Species is empty");
+        }
 
         while (children.size() + species.size() < POPULATION) {
             final Species species = this.species.get(random.nextInt(this.species.size()));
             children.add(species.breedChild());
         }
 
-        for (final Genome child : children)
+        for (final Genome child : children) {
             addToSpecies(child);
+        }
 
-        ++generation;
+//        System.out.println("pre: " + s + " post: " + species.size());
+//        System.out.println("------------------------------");
+
+        generation++;
 
     }
 
@@ -132,30 +137,20 @@ public class Population {
             for (final Genome genome : species.genomes)
                 global.add(genome);
 
-        Collections.sort(global, new Comparator<Genome>() {
+        // // TODO This comparator was inverse
+        Collections.sort(global);
+//        Collections.reverse(global);
 
-            @Override
-            public int compare(final Genome o1, final Genome o2) {
-                final double cmp = o1.fitness - o2.fitness;
-                return cmp == 0 ? 0 : cmp > 0 ? 1 : -1;
-            }
-        });
-
-        for (int i = 0; i < global.size(); ++i)
+        for (int i = 0; i < global.size(); ++i) {
             global.get(i).globalRank = i;
+        }
+
     }
 
     private void removeStaleSpecies() {
         final List<Species> survived = new ArrayList<Species>();
         for (final Species species : this.species) {
-            Collections.sort(species.genomes, new Comparator<Genome>() {
-
-                @Override
-                public int compare(final Genome o1, final Genome o2) {
-                    final double cmp = o2.fitness - o1.fitness;
-                    return cmp == 0 ? 0 : cmp > 0 ? 1 : -1;
-                }
-            });
+            Collections.sort(species.genomes);
 
             if (species.genomes.get(0).fitness > species.topFitness) {
                 species.topFitness = species.genomes.get(0).fitness;
@@ -193,7 +188,22 @@ public class Population {
         return total;
     }
 
-    public static boolean isInput(final int id){ return id < INPUTS; }
-    public static boolean isOutput(final int id){ return id >= INPUTS && id < INPUTS + OUTPUTS; }
+    @Override
+    public void write(Json json) {
+        json.writeObjectStart("population");
+        json.writeValue("generation", this.generation, Integer.class);
+        json.writeValue("fitness", this.maxFitness, Double.class);
+        json.writeArrayStart("species");
+        for(Species s: this.species){
+            json.writeValue(s);
+        }
+        json.writeArrayEnd();
+        json.writeObjectEnd();
+    }
+
+    @Override
+    public void read(Json json, JsonValue jsonData) {
+
+    }
 
 }

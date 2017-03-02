@@ -1,22 +1,31 @@
 package com.github.jotask.neat.jneat;
 
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.jotask.neat.jneat.JNeat.random;
-import static com.github.jotask.neat.jneat.Population.*;
+import static com.github.jotask.neat.engine.JRandom.random;
+import static com.github.jotask.neat.jneat.Constants.*;
+import static com.github.jotask.neat.jneat.NeatUtil.isOutput;
 
-public class Genome {
+public class Genome implements Json.Serializable, Comparable<Genome>{
 
     public final List<Synapse> genes = new ArrayList<Synapse>();
     public double fitness = 0.0;
+
+    // FIXME maxNeuron
+    // maxNeuron = network.neurons < OUTPUTS  (maybe)
     public int maxNeuron = 0;
+
     public int globalRank = 0;
     public final double[] mutationRates = new double[] { CONN_MUTATION, LINK_MUTATION, BIAS_MUTATION, NODE_MUTATION, ENABLE_MUTATION, DISABLE_MUTATION, STEP_SIZE };
     public Network network = null;
 
     public Genome() {}
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public Genome clone() {
         final Genome genome = new Genome();
@@ -80,14 +89,17 @@ public class Genome {
     public void mutate() {
 
         // FIXME here is were the outputs neurons connect
+        check();
 
-        for (int i = 0; i < 7; ++i)
+        for (int i = 0; i < mutationRates.length; i++)
             mutationRates[i] *= random.nextBoolean() ? 0.95 : 1.05263;
 
         if (random.nextDouble() < mutationRates[0])
             mutatePoint();
 
         double prob = mutationRates[1];
+
+
         while (prob > 0) {
             if (random.nextDouble() < prob)
                 mutateLink(false);
@@ -121,6 +133,7 @@ public class Genome {
                 mutateEnableDisable(false);
             --prob;
         }
+        check();
     }
 
     public void mutateEnableDisable(final boolean enable) {
@@ -148,6 +161,7 @@ public class Genome {
             neuron2 = randomNeuron(true, false);
         }while((isOutput(neuron1) && isOutput(neuron2)));
 
+        // FIXME sometimes creates a link with empty connection
         final Synapse newLink = new Synapse();
 
             newLink.input = neuron1;
@@ -169,7 +183,7 @@ public class Genome {
     public void mutateNode() {
 
         // FIXME improve
-        check();
+//        check();
 //        System.out.println("enter");
 
         if (genes.isEmpty())
@@ -184,9 +198,12 @@ public class Genome {
 
         ++maxNeuron;
 
+        // TODO Mutate nodes properly
+
+        // FIXME
         if(isOutput(maxNeuron)){
-//            System.out.println(gene.input + " : " + gene.output);
-            return;
+            System.out.println("Genome[200]: " + gene.input + " : " + gene.output);
+//            return;
         }
 
         final Synapse gene1 = gene.clone();
@@ -202,7 +219,7 @@ public class Genome {
         gene2.enabled = true;
         genes.add(gene2);
 
-        check();
+//        check();
 //        System.out.println("exit");
 
     }
@@ -254,5 +271,29 @@ public class Genome {
                     continue search;
                 }
         return sum / coincident;
+    }
+
+    @Override
+    public void write(Json json) {
+        json.writeValue("fitness", fitness, Double.class);
+        json.writeValue("maxNeuron", maxNeuron, Integer.class);
+        json.writeValue("globalRank", globalRank, Integer.class);
+//        json.writeValue(network);
+        json.writeArrayStart("synapse");
+        for(Synapse s: this.genes){
+            json.writeValue(s);
+        }
+        json.writeArrayEnd();
+    }
+
+    @Override
+    public void read(Json json, JsonValue jsonData) {
+
+    }
+
+    @Override
+    public int compareTo(Genome other) {
+        final double cmp = other.fitness - this.fitness;
+        return cmp == 0.0 ? 0 : cmp > 0.0 ? 1 : -1;
     }
 }

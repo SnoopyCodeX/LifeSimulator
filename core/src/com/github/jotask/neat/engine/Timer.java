@@ -18,7 +18,7 @@ public class Timer {
         reset();
     }
 
-    public static final long toSec(float seg){
+    public static long toSec(float seg){
 
         Float f = seg;
 

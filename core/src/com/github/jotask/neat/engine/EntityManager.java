@@ -18,7 +18,7 @@ import java.util.LinkedList;
 public class EntityManager{
 
     private static EntityManager instance;
-    public static final EntityManager get(){
+    public static EntityManager get(){
         if(instance == null)
             instance = new EntityManager();
         return instance;
@@ -73,9 +73,7 @@ public class EntityManager{
 
         }
         entities = newPopulation;
-        for(int i = 0; i < f; i++){
-            Neat.get().getFactory().food();
-        }
+
     }
 
     public void render(SpriteBatch sb) {

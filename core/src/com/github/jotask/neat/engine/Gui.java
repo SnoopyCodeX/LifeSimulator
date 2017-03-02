@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.jneat.Population;
+import com.github.jotask.neat.jneat.Constants;
 
 /**
  * Gui
@@ -36,9 +36,13 @@ public class Gui {
         x += off;
         y -= off;
         int i = 0;
-        font.draw(sb, "Enemies: " + neat.getNeat().getAlive() + " / " + Population.POPULATION, x, y - space * i++);
-        font.draw(sb, "Food: " + EntityManager.get().getFoods(), x, y - space * i++) ;
+        font.draw(sb, "FPS: " + Gdx.graphics.getFramesPerSecond(), x, y - space * i++);
+        font.draw(sb, "JavaHeap: " + Util.bytesToMb(Gdx.app.getJavaHeap()), x, y - space * i++);
+        font.draw(sb, "NativeHeap: " + Util.bytesToMb(Gdx.app.getNativeHeap()), x, y - space * i++);
+        font.draw(sb, "Enemies: " + neat.getNeat().getAlive() + " / " + Constants.POPULATION, x, y - space * i++);
         font.draw(sb, "Generation: " + neat.getNeat().getGeneration(), x, y - space * i++) ;
+        font.draw(sb, "Fitness: " + neat.getNeat().getMaxFitness(), x, y - space * i++) ;
+        font.draw(sb, "Species: " + neat.getNeat().pool.species.size(), x, y - space * i) ;
 
         {
             final float xx = (camera.viewportWidth / 2f) - 50;

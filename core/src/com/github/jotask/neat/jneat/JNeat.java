@@ -1,12 +1,21 @@
 package com.github.jotask.neat.jneat;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter;
 import com.github.jotask.neat.Neat;
+import com.github.jotask.neat.engine.Util;
+import com.github.jotask.neat.jneat.fitness.BasicFitness;
+import com.github.jotask.neat.jneat.fitness.Fitness;
+import com.github.jotask.neat.jneat.gui.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import static com.github.jotask.neat.jneat.Constants.FILE;
 
 /**
  * JNeat
@@ -16,15 +25,13 @@ import java.util.Random;
  */
 public class JNeat {
 
-    public static final float THRESHOLD = .75f;
-
     final Neat neat;
 
-    private int ticks;
+    public Population pool;
 
-    public static final Random random = new Random();
+    private Data data;
 
-    private final Population pool;
+    private Fitness fitness;
 
     private NeatEnemy best;
 
@@ -35,9 +42,19 @@ public class JNeat {
     public JNeat(final Neat neat) {
         this.neat = neat;
         this.entities = new ArrayList<NeatEnemy>();
-        this.ticks = 0;
+
+        this.data = new Data(neat.getCamera());
+
+        this.fitness = new BasicFitness();
+
         this.pool = new Population();
+
+        if(!load()){
+            this.pool.init();
+        }
+
         init();
+
     }
 
     public void init(){
@@ -65,7 +82,7 @@ public class JNeat {
         }
     }
 
-    public void learn(){
+    public void learn() {
 
         this.setBest(entities.get(0));
 
@@ -73,9 +90,9 @@ public class JNeat {
 
         alive = entities.size();
 
-        for (final NeatEnemy entities : entities) {
+        for (final NeatEnemy e : entities) {
 
-            if (entities.isDie()) {
+            if (e.isDie()) {
                 alive--;
                 continue;
             }
@@ -83,21 +100,29 @@ public class JNeat {
             allDead = false;
 
             // TODO improve fitness
-            double fitness = ticks++ - entities.getScore() * 1.5;
-            fitness = fitness == 0.0 ? -1.0 : fitness;
+            double fitness = this.fitness.evaluate(e);
 
-            entities.getGenome().fitness = fitness;
-            if (fitness > pool.maxFitness)
+            fitness = (fitness == 0.0) ? -1.0 : fitness;
+
+            e.getGenome().fitness = fitness;
+
+            if (fitness > pool.maxFitness) {
                 pool.maxFitness = fitness;
+            }
 
-            if (fitness > best.getGenome().fitness)
-                this.setBest(entities);
+            if (fitness > best.getGenome().fitness){
+                this.setBest(e);
+            }
+
         }
 
         if (allDead) {
+            data.addFitness(pool.generation, best.getGenome().fitness);
+            save();
             pool.newGeneration();
             init();
             Neat.get().getPlayer().respawn();
+            fitness.reset();
         }
 
     }
@@ -119,12 +144,43 @@ public class JNeat {
 
     }
 
-    public void dispose(){
-
-    }
+    public void dispose(){ }
 
     public int getAlive(){ return this.alive; }
 
     public int getGeneration() { return this.pool.generation; }
+
+    public void save(){
+
+        Json json = new Json(JsonWriter.OutputType.json);
+
+        final String s = json.prettyPrint(this.pool);
+        final String ss = json.toJson(this.pool);
+
+//        final FileHandle internal = Gdx.files.local(file);
+//        internal.writeString(s, false);
+//
+//        final FileHandle intern = Gdx.files.local("data/genome.min.json");
+//        intern.writeString(ss, false);
+    }
+
+    public boolean load(){
+        final FileHandle internal = Gdx.files.local(FILE);
+        if(!internal.exists()){
+            return false;
+        }else{
+            return false;
+        }
+
+//        final String s = internal.readString();
+//
+//        Json json = new Json(JsonWriter.OutputType.json);
+//        Genome g = json.fromJson(Genome.class, s);
+//        return true;
+    }
+
+    public String getMaxFitness(){ return String.valueOf(Util.cutDecimals(this.pool.maxFitness, 2)); }
+
+    public Data getData() { return data; }
 
 }

@@ -6,7 +6,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.github.jotask.neat.engine.JRandom;
 import com.github.jotask.neat.engine.controller.PlayerController;
-import com.github.jotask.neat.engine.radar.RadarPlayer;
 
 /**
  * Player
@@ -22,11 +21,8 @@ public class Player extends Entity{
 
     public final float SPEED = 10;
 
-    private final RadarPlayer radar;
-
-    public Player(final Body body, final RadarPlayer radar) {
+    public Player(final Body body) {
         super(body);
-        this.radar = radar;
         controller = new PlayerController(this);
         this.velocity = new Vector2();
     }
@@ -42,12 +38,13 @@ public class Player extends Entity{
 
     @Override
     public void debug(ShapeRenderer sr) {
+        sr.set(ShapeRenderer.ShapeType.Filled);
         sr.setColor(Color.LIME);
         sr.circle(getBody().getPosition().x, getBody().getPosition().y, .5f, 20);
     }
 
     public void respawn(){
-        Vector2 p = JRandom.randomPosition();
+        Vector2 p = JRandom.randomPositionPlayer();
         this.getBody().setTransform(p, this.getBody().getAngle());
     }
 

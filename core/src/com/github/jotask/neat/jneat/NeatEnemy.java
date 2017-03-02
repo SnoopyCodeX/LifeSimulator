@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.github.jotask.neat.Neat;
 import com.github.jotask.neat.engine.entity.Enemy;
-import com.github.jotask.neat.engine.radar.RadarEnemy;
 import com.github.jotask.neat.jneat.neurons.Hidden;
 import com.github.jotask.neat.jneat.neurons.Input;
 import com.github.jotask.neat.jneat.neurons.Neuron;
@@ -17,8 +16,8 @@ import com.github.jotask.neat.jneat.neurons.Output;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.github.jotask.neat.jneat.Population.INPUTS;
-import static com.github.jotask.neat.jneat.Population.OUTPUTS;
+import static com.github.jotask.neat.jneat.Constants.INPUTS;
+import static com.github.jotask.neat.jneat.Constants.OUTPUTS;
 
 /**
  * NeatEnemy
@@ -36,8 +35,8 @@ public class NeatEnemy extends Enemy {
 
     private float score;
 
-    public NeatEnemy(final Body body, final RadarEnemy radar, final Genome genome) {
-        super(body, radar);
+    public NeatEnemy(final Body body, final Genome genome) {
+        super(body);
         this.genome = genome;
         this.genome.generateNetwork();
         v = new Vector2();
@@ -47,7 +46,7 @@ public class NeatEnemy extends Enemy {
     public Genome getGenome() { return genome; }
 
     public double[] getInput(){
-        final double[] inputs = new double[Population.INPUTS];
+        final double[] inputs = new double[INPUTS];
         inputs[0] = this.getBody().getPosition().x;
         inputs[1] = this.getBody().getPosition().y;
         final Vector2 p = Neat.get().getPlayer().getBody().getPosition();
@@ -70,7 +69,7 @@ public class NeatEnemy extends Enemy {
 
     }
 
-    private boolean threshold(double value){ return (value > JNeat.THRESHOLD); }
+    private boolean threshold(double value){ return (value > Constants.THRESHOLD); }
 
     @Override
     public void debug(ShapeRenderer sr) {
@@ -120,14 +119,15 @@ public class NeatEnemy extends Enemy {
         final float minX;
         final float maxX;
 
-        final float xM;
         final float yM;
 
         {
-            minX = c.position.x - c.viewportWidth / 2f;
-            maxX = c.position.x + c.viewportWidth / 2f;
+//            minX = c.position.x - c.viewportWidth / 2f;
+//            maxX = c.position.x + c.viewportWidth / 2f;
 
-            xM = c.position.x;
+            minX = -21f / 2f;
+            maxX = 21f / 2f;
+
             yM = c.position.y;
         }
 
@@ -141,17 +141,26 @@ public class NeatEnemy extends Enemy {
             final Neuron neuron = entry.getValue();
 
             if(neuron instanceof Input){
-                float x = minX;
-                float y = yInput;
+                final float y = yInput;
                 yInput += Cell.SIZE;
-                graph.put(i, new Cell(i, x, y, neuron.value, neuron.type));
+                graph.put(i, new Cell(i, minX, y, neuron.value, neuron.type));
             }else if(neuron instanceof Output){
                 float x = maxX - Cell.SIZE;
                 float y = yOutput;
                 yOutput += Cell.SIZE;
                 graph.put(i, new Cell(i, x, y, neuron.value, neuron.type));
             }else if(neuron instanceof Hidden){
-                float x = (minX + maxX) / 2f;
+
+                float x = ((minX + 30f) + (maxX - 30f)) / 2f;
+
+                float j = 0;
+
+                for(Synapse s: neuron.inputs){
+                    Neuron a = this.genome.network.network.get(s.input);
+                    Neuron b = this.genome.network.network.get(s.input);
+
+                }
+
                 float y = yM;
                 graph.put(i, new Cell(i, x, y, neuron.value, neuron.type));
             }else{
@@ -159,24 +168,32 @@ public class NeatEnemy extends Enemy {
             }
         }
 
-//        for(final Synapse gene: best.getGenome().genes){
-//            final Cell c1 = graph.get(gene.input);
-//            final Cell c2 = graph.get(gene.output);
-//            if (gene.input >= INPUTS + OUTPUTS) {
-//                c1.x = (int) (0.75 * c1.x + 0.25 * c2.x);
-//                if (c1.x >= c2.x) c1.x = c1.x - 60;
-//                if (c1.x < minX)  c1.x = minX;
-//                if (c1.x > maxX)  c1.x = maxX;
-//                c1.y = (int) (0.75 * c1.y + 0.25 * c2.y);
-//            }
-//            if (gene.output >= INPUTS + OUTPUTS) {
-//                c2.x = (int) (0.25 * c1.x + 0.75 * c2.x);
-//                if (c1.x >= c2.x) c2.x = c2.x + 60;
-//                if (c2.x < minX)  c2.x = minX;
-//                if (c2.x > maxX)  c2.x = maxX;
-//                c2.y = (int) (0.25 * c1.y + 0.75 * c2.y);
-//            }
-//        }
+        // FIXME sometimes a synapse link is null
+
+        for(final Synapse gene: this.getGenome().genes){
+            final Cell c1 = graph.get(gene.input);
+            final Cell c2 = graph.get(gene.output);
+
+            if(c1 == null || c2 == null){
+                System.out.println("isNull");
+                continue;
+            }
+
+            if (gene.input >= INPUTS + OUTPUTS) {
+                c1.x = (int) (0.75 * c1.x + 0.25 * c2.x);
+                if (c1.x >= c2.x) c1.x = c1.x - 60;
+                if (c1.x < minX)  c1.x = minX;
+                if (c1.x > maxX)  c1.x = maxX;
+                c1.y = (int) (0.75 * c1.y + 0.25 * c2.y);
+            }
+            if (gene.output >= INPUTS + OUTPUTS) {
+                c2.x = (int) (0.25 * c1.x + 0.75 * c2.x);
+                if (c1.x >= c2.x) c2.x = c2.x + 60;
+                if (c2.x < minX)  c2.x = minX;
+                if (c2.x > maxX)  c2.x = maxX;
+                c2.y = (int) (0.25 * c1.y + 0.75 * c2.y);
+            }
+        }
 
         sr.set(ShapeRenderer.ShapeType.Filled);
 

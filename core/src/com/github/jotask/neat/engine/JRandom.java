@@ -14,7 +14,7 @@ public final class JRandom {
 
     private JRandom(){}
 
-    static final Random random = new Random();
+    public static final Random random = new Random(23);
 
     public static float random(){ return random.nextFloat(); }
 
@@ -33,6 +33,15 @@ public final class JRandom {
         final float HEIGHT = 11f / 2f;
         float x = random(-WIDTH, WIDTH);
         float y = random(-HEIGHT, HEIGHT);
+        return new Vector2(x, y);
+    }
+
+    public static Vector2 randomPositionPlayer(){
+        final float offset = 5f;
+        final float WIDTH = 21f / 2f;
+        final float HEIGHT = 11f / 2f;
+        float x = random(-WIDTH + offset, WIDTH - offset);
+        float y = random(-HEIGHT + offset, HEIGHT - offset);
         return new Vector2(x, y);
     }
 

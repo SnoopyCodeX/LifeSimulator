@@ -1,12 +1,14 @@
 package com.github.jotask.neat.jneat;
 
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.jotask.neat.jneat.JNeat.random;
-import static com.github.jotask.neat.jneat.Population.CROSSOVER;
+import static com.github.jotask.neat.engine.JRandom.random;
 
-public class Species {
+public class Species implements Json.Serializable{
 
     public final List<Genome> genomes = new ArrayList<Genome>();
     public double topFitness = 0.0;
@@ -15,12 +17,13 @@ public class Species {
 
     public Genome breedChild() {
         final Genome child;
-        if (random.nextDouble() < CROSSOVER) {
+        if (random.nextDouble() < Constants.CROSSOVER) {
             final Genome g1 = genomes.get(random.nextInt(genomes.size()));
             final Genome g2 = genomes.get(random.nextInt(genomes.size()));
             child = crossover(g1, g2);
-        } else
+        } else {
             child = genomes.get(random.nextInt(genomes.size())).clone();
+        }
         child.mutate();
         return child;
     }
@@ -33,6 +36,7 @@ public class Species {
     }
 
     public Genome crossover(Genome g1, Genome g2) {
+
         if (g2.fitness > g1.fitness) {
             final Genome tmp = g1;
             g1 = g2;
@@ -40,22 +44,40 @@ public class Species {
         }
 
         final Genome child = new Genome();
-        outerloop: for (final Synapse gene1 : g1.genes) {
+        outerLoop: for (final Synapse gene1 : g1.genes) {
             for (final Synapse gene2 : g2.genes)
                 if (gene1.innovation == gene2.innovation)
                     if (random.nextBoolean() && gene2.enabled) {
                         child.genes.add(gene2.clone());
-                        continue outerloop;
+                        continue outerLoop;
                     } else
                         break;
             child.genes.add(gene1.clone());
         }
 
-        child.maxNeuron = Math.max(g1.maxNeuron, g2.maxNeuron);
+//        child.maxNeuron = Math.max(g1.maxNeuron, g2.maxNeuron);
 
         for (int i = 0; i < 7; ++i)
             child.mutationRates[i] = g1.mutationRates[i];
+
         return child;
+    }
+
+    @Override
+    public void write(Json json) {
+        json.writeValue("topFitness", topFitness, Double.class);
+        json.writeValue("averageFitness", averageFitness, Double.class);
+        json.writeValue("staleness", staleness, Integer.class);
+        json.writeArrayStart("genome");
+        for(final Genome g: this.genomes){
+            json.writeValue(g);
+        }
+        json.writeArrayEnd();
+    }
+
+    @Override
+    public void read(Json json, JsonValue jsonData) {
+
     }
 
 }

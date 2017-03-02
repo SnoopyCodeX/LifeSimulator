@@ -60,13 +60,8 @@ public class WorldListener implements ContactListener {
 
         if(radar != null && food != null){
             radar.inRange(food);
-            return;
         }else if(enemy != null && food != null){
             enemy.eat(food);
-            return;
-        }else {
-            // TODO
-//            System.out.println("unknown collision: a:" + a.getClass().getSimpleName() + " b: " + b.getClass().getSimpleName());
         }
 
     }
@@ -106,10 +101,6 @@ public class WorldListener implements ContactListener {
 
         if(radar != null && food != null){
             radar.outRange(food);
-            return;
-        }else {
-            // TODO
-//            System.out.println("unknown collision endContact: a:" + a.getClass().getSimpleName() + " b: " + b.getClass().getSimpleName());
         }
     }
 

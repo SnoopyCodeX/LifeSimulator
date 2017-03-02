@@ -3,12 +3,8 @@ package com.github.jotask.neat.engine;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.engine.entity.Enemy;
 import com.github.jotask.neat.engine.entity.Entity;
-import com.github.jotask.neat.engine.entity.Food;
 import com.github.jotask.neat.engine.entity.Player;
-import com.github.jotask.neat.engine.radar.RadarEnemy;
-import com.github.jotask.neat.engine.radar.RadarPlayer;
 import com.github.jotask.neat.jneat.Genome;
 import com.github.jotask.neat.jneat.NeatEnemy;
 
@@ -30,25 +26,25 @@ public class Factory {
 
         final float radius = .5f;
 
-        final Vector2 p = getRandomPositionOnWorld();
+        final Vector2 p = JRandom.randomPositionPlayer();
         final Body body = createBody(p.x, p.y);
 
         Fixture playerBody = createEntityBody(body, radius);
-        Fixture radarBody = createRadar(body);
+//        Fixture radarBody = createRadar(body);
 
-        RadarPlayer radar = new RadarPlayer();
-        radarBody.setUserData(radar);
+//        RadarPlayer radar = new RadarPlayer();
+//        radarBody.setUserData(radar);
 
-        Player player = new Player(body, radar);
-        radar.setEnt(player);
+        Player player = new Player(body);
+//        radar.setEnt(player);
         playerBody.setUserData(player);
 
         body.setUserData(Entity.Type.PLAYER);
 
-        EntityManager.add(player);
+//        EntityManager.add(player);
 
-        CollisionFilter.setMask(playerBody, CollisionFilter.EENTITY.PLAYER);
-        CollisionFilter.setMask(radarBody, CollisionFilter.EENTITY.PLAYER_RADAR);
+        CollisionFilter.setMask(playerBody, CollisionFilter.ENTITY.PLAYER);
+//        CollisionFilter.setMask(radarBody, CollisionFilter.ENTITY.PLAYER_RADAR);
 
         return player;
 
@@ -57,78 +53,78 @@ public class Factory {
 
     public final NeatEnemy getNeatEnemy(final Genome genome){
 
-        final Vector2 p = getRandomPositionOnWorld();
+        final Vector2 p = JRandom.randomPosition();
         float radius = .5f;
 
         final Body body = createBody(p.x, p.y);
 
-        Fixture enemybody = createEntityBody(body, radius);
+        Fixture enemyBody = createEntityBody(body, radius);
 
-        Fixture radarBody = createRadar(body);
+//        Fixture radarBody = createRadar(body);
 
-        RadarEnemy radar = new RadarEnemy();
-        radarBody.setUserData(radar);
+//        RadarEnemy radar = new RadarEnemy();
+//        radarBody.setUserData(radar);
 
-        NeatEnemy enemy = new NeatEnemy(body, radar, genome);
+        NeatEnemy enemy = new NeatEnemy(body, genome);
 
-        radar.setEnt(enemy);
+//        radar.setEnt(enemy);
 
         body.setUserData(Entity.Type.ENEMY);
 
-        enemybody.setUserData(enemy);
+        enemyBody.setUserData(enemy);
 
         EntityManager.add(enemy);
 
-        CollisionFilter.setMask(enemybody, CollisionFilter.EENTITY.ENEMY);
-        CollisionFilter.setMask(radarBody, CollisionFilter.EENTITY.ENEMY_RADAR);
+        CollisionFilter.setMask(enemyBody, CollisionFilter.ENTITY.ENEMY);
+//        CollisionFilter.setMask(radarBody, CollisionFilter.ENTITY.ENEMY_RADAR);
 
         return enemy;
 
     }
 
-    public synchronized Enemy getEnemy(){
-        final Vector2 p = getRandomPositionOnWorld();
-        float x = p.x;
-        float y = p.y;
-        float radius = .5f;
-        return this.getEnemy(x, y, radius);
-    }
-
-    public Enemy getEnemy(final float x, final float y, float radius){
-
-        final Body body = createBody(x, y);
-
-        Fixture enemybody = createEntityBody(body, radius);
-
-        Fixture radarBody = createRadar(body);
-
-        RadarEnemy radar = new RadarEnemy();
-        radarBody.setUserData(radar);
-
-        Enemy enemy = new Enemy(body, radar);
-
-        radar.setEnt(enemy);
-
-        enemybody.setUserData(enemy);
-
-        body.setUserData(Entity.Type.ENEMY);
-
-        EntityManager.add(enemy);
-
-        return enemy;
-
-    }
-
-    private Fixture createRadar(final Body body){
-        CircleShape shape = new CircleShape();
-        shape.setRadius(RadarEnemy.SIZE);
-        FixtureDef fd = new FixtureDef();
-        fd.isSensor = true;
-        fd.shape = shape;
-        Fixture f = body.createFixture(fd);
-        shape.dispose();
-        return f;
-    }
+//    public Enemy getEnemy(){
+//        final Vector2 p = getRandomPositionOnWorld();
+//        float x = p.x;
+//        float y = p.y;
+//        float radius = .5f;
+//        return this.getEnemy(x, y, radius);
+//    }
+//
+//    public Enemy getEnemy(final float x, final float y, float radius){
+//
+//        final Body body = createBody(x, y);
+//
+//        Fixture enemyBody = createEntityBody(body, radius);
+//
+//        Fixture radarBody = createRadar(body);
+//
+//        RadarEnemy radar = new RadarEnemy();
+//        radarBody.setUserData(radar);
+//
+//        Enemy enemy = new Enemy(body, radar);
+//
+//        radar.setEnt(enemy);
+//
+//        enemyBody.setUserData(enemy);
+//
+//        body.setUserData(Entity.Type.ENEMY);
+//
+//        EntityManager.add(enemy);
+//
+//        return enemy;
+//
+//    }
+//
+//    private Fixture createRadar(final Body body){
+//        CircleShape shape = new CircleShape();
+//        shape.setRadius(RadarEnemy.SIZE);
+//        FixtureDef fd = new FixtureDef();
+//        fd.isSensor = true;
+//        fd.shape = shape;
+//        Fixture f = body.createFixture(fd);
+//        shape.dispose();
+//        return f;
+//    }
 
     public void createWalls(){
         float WIDTH = 21f / 2f;
@@ -151,45 +147,37 @@ public class Factory {
         FixtureDef fd = new FixtureDef();
         fd.shape = shape;
 
-        CollisionFilter.setMask(fd, CollisionFilter.EENTITY.WALLS);
+        Fixture f = body.createFixture(fd);
 
-        body.createFixture(fd);
-
-    }
-
-    public Food food(){
-        Vector2 p = getRandomPositionOnWorld();
-        float x = p.x;
-        float y = p.y;
-        float radius = .1f;
-        return this.food(x, y, radius);
-    }
-
-    public Food food(float x, float y, float radius){
-
-        Body body = this.createBody(x, y);
-
-        Fixture fix = this.createEntityBody(body, radius);
-
-        Food food = new Food(body);
-
-        fix.setUserData(food);
-
-        body.setUserData(Entity.Type.FOOD);
-
-        EntityManager.add(food);
-
-        return food;
+        CollisionFilter.setMask(f, CollisionFilter.ENTITY.WALLS);
 
     }
+//
+//    public Food food(){
+//        Vector2 p = getRandomPositionOnWorld();
+//        float x = p.x;
+//        float y = p.y;
+//        float radius = .1f;
+//        return this.food(x, y, radius);
+//    }
 
-    private Vector2 getRandomPositionOnWorld(){
-        float w = 21f / 2f;
-        float h = 11f / 2f;
-        float x = JRandom.random(w, -w);
-        float y = JRandom.random(h, -h);
-        return new Vector2(x, y);
-    }
+//    public Food food(float x, float y, float radius){
+//
+//        Body body = this.createBody(x, y);
+//
+//        Fixture fix = this.createEntityBody(body, radius);
+//
+//        Food food = new Food(body);
+//
+//        fix.setUserData(food);
+//
+//        body.setUserData(Entity.Type.FOOD);
+//
+//        EntityManager.add(food);
+//
+//        return food;
+//
+//    }
 
     private Body createBody(float x, float y){
 

@@ -19,7 +19,7 @@ import static com.badlogic.gdx.Gdx.gl;
 public class Neat extends ApplicationAdapter {
 
 	private static Neat instance;
-	public static final Neat get(){ return instance; }
+	public static Neat get(){ return instance; }
 
 	final Color b = Color.WHITE;
 
@@ -80,6 +80,7 @@ public class Neat extends ApplicationAdapter {
 
 	public void update(){
 		world.step(Gdx.graphics.getDeltaTime(), 6, 3);
+		player.update();
 		neat.evaluate();
 		entityManager.update();
 		neat.learn();
@@ -99,6 +100,7 @@ public class Neat extends ApplicationAdapter {
 
 		sb.begin();
 		entityManager.render(sb);
+		player.render(sb);
 		sb.end();
 
 		sr.setProjectionMatrix(camera.combined);
@@ -106,6 +108,7 @@ public class Neat extends ApplicationAdapter {
 		sr.begin();
 		sr.set(ShapeRenderer.ShapeType.Filled);
 		entityManager.debug(sr);
+		player.debug(sr);
 		sr.end();
 
 		gl.glEnable(GL20.GL_BLEND);
@@ -114,6 +117,7 @@ public class Neat extends ApplicationAdapter {
 		sb.begin();
 		sr.begin();
 		neat.render(sb, sr);
+		neat.getData().render(sb, sr);
 		sr.end();
 		sb.end();
 
