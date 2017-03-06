@@ -1,6 +1,6 @@
 package com.github.jotask.neat.engine.controller;
 
-import com.github.jotask.neat.engine.JRandom;
+import com.github.jotask.neat.util.JRandom;
 import com.github.jotask.neat.engine.entity.Player;
 
 /**

@@ -1,28 +1,38 @@
 package com.github.jotask.neat.jneat;
 
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
+import com.github.jotask.neat.util.JRandom;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 
-import static com.github.jotask.neat.engine.JRandom.random;
+/**
+ * Species
+ *
+ * @author Jose Vives Iznardo
+ * @since 02/03/2017
+ */
+public class Species {
 
-public class Species implements Json.Serializable{
+    public LinkedList<Genome> genomes;
 
-    public final List<Genome> genomes = new ArrayList<Genome>();
-    public double topFitness = 0.0;
-    public double averageFitness = 0.0;
+    public double topFitness;
+    public double averageFitness;
     public int staleness = 0;
+
+    public Species() {
+        this.genomes = new LinkedList<Genome>();
+        this.topFitness = 0.0;
+        this.averageFitness = 0.0;
+        this.staleness = 0;
+    }
 
     public Genome breedChild() {
         final Genome child;
-        if (random.nextDouble() < Constants.CROSSOVER) {
-            final Genome g1 = genomes.get(random.nextInt(genomes.size()));
-            final Genome g2 = genomes.get(random.nextInt(genomes.size()));
+        if (JRandom.random() < Constants.CROSSOVER) {
+            final Genome g1 = genomes.get(JRandom.random.nextInt(genomes.size()));
+            final Genome g2 = genomes.get(JRandom.random.nextInt(genomes.size()));
             child = crossover(g1, g2);
         } else {
-            child = genomes.get(random.nextInt(genomes.size())).clone();
+            child = new Genome(genomes.get(JRandom.random.nextInt(genomes.size())));
         }
         child.mutate();
         return child;
@@ -30,54 +40,41 @@ public class Species implements Json.Serializable{
 
     public void calculateAverageFitness() {
         double total = 0.0;
-        for (final Genome genome : genomes)
-            total += genome.globalRank;
+        for (final Genome genome : genomes) {
+            total += genome.getGlobalRank();
+        }
         averageFitness = total / genomes.size();
     }
 
     public Genome crossover(Genome g1, Genome g2) {
 
-        if (g2.fitness > g1.fitness) {
+        if (g2.getFitness() > g1.getFitness()) {
             final Genome tmp = g1;
             g1 = g2;
             g2 = tmp;
         }
 
         final Genome child = new Genome();
-        outerLoop: for (final Synapse gene1 : g1.genes) {
-            for (final Synapse gene2 : g2.genes)
-                if (gene1.innovation == gene2.innovation)
-                    if (random.nextBoolean() && gene2.enabled) {
-                        child.genes.add(gene2.clone());
+        outerLoop: for (final Synapse gene1 : g1.getGenes()) {
+            for (final Synapse gene2 : g2.getGenes()){
+                if (gene1.getInnovation() == gene2.getInnovation()) {
+                    if (JRandom.random.nextBoolean() && gene2.isEnabled()) {
+                        child.getGenes().add(new Synapse(gene2));
                         continue outerLoop;
-                    } else
+                    } else {
                         break;
-            child.genes.add(gene1.clone());
+                    }
+                }
+            }
+            child.getGenes().add(new Synapse(gene1));
         }
-
-//        child.maxNeuron = Math.max(g1.maxNeuron, g2.maxNeuron);
-
-        for (int i = 0; i < 7; ++i)
-            child.mutationRates[i] = g1.mutationRates[i];
 
         return child;
     }
 
     @Override
-    public void write(Json json) {
-        json.writeValue("topFitness", topFitness, Double.class);
-        json.writeValue("averageFitness", averageFitness, Double.class);
-        json.writeValue("staleness", staleness, Integer.class);
-        json.writeArrayStart("genome");
-        for(final Genome g: this.genomes){
-            json.writeValue(g);
-        }
-        json.writeArrayEnd();
-    }
-
-    @Override
-    public void read(Json json, JsonValue jsonData) {
-
+    protected Species clone() throws CloneNotSupportedException {
+        throw new RuntimeException("Species clone");
     }
 
 }

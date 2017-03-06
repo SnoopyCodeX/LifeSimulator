@@ -1,7 +1,5 @@
 package com.github.jotask.neat.jneat;
 
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
 import com.github.jotask.neat.jneat.neurons.Hidden;
 import com.github.jotask.neat.jneat.neurons.Input;
 import com.github.jotask.neat.jneat.neurons.Neuron;
@@ -11,45 +9,70 @@ import java.util.*;
 
 import static com.github.jotask.neat.jneat.Constants.INPUTS;
 import static com.github.jotask.neat.jneat.Constants.OUTPUTS;
-import static com.github.jotask.neat.jneat.NeatUtil.isOutput;
-import static com.github.jotask.neat.jneat.NeatUtil.isInput;
+import static com.github.jotask.neat.jneat.Util.isInput;
+import static com.github.jotask.neat.jneat.Util.isOutput;
 
 /**
  * Network
  *
  * @author Jose Vives Iznardo
- * @since 27/02/2017
+ * @since 02/03/2017
  */
-public class Network implements Json.Serializable{
+public class Network{
 
-    final HashMap<Integer, Neuron> network;
+    private final HashMap<Integer, Neuron> network;
+
+    private final LinkedList<Input> inputs;
+    private final LinkedList<Hidden> hidden;
+    private final LinkedList<Output> outputs;
 
     public Network(List<Synapse> genes){
 
-        network = new HashMap<Integer, Neuron>();
+        this.network = new HashMap<Integer, Neuron>();
+
+        this.inputs = new LinkedList<Input>();
+        this.hidden = new LinkedList<Hidden>();
+        this.outputs = new LinkedList<Output>();
 
         for (int i = 0; i < INPUTS; i++){
-            network.put(i, new Input(i));
+            final Input input = new Input(i);
+            this.inputs.add(input);
+            this.network.put(i, input);
         }
 
         for (int i = 0; i < OUTPUTS; i++){
-            network.put(INPUTS + i, new Output(INPUTS + i));
+            final Output output = new Output(INPUTS + i);
+            this.outputs.add(output);
+            this.network.put(INPUTS + i, output);
         }
 
-        Collections.sort(genes);
+        Collections.sort(genes, new Comparator<Synapse>() {
+
+            @Override
+            public int compare(final Synapse o1, final Synapse o2) {
+                return o1.getOutput() - o2.getOutput();
+            }
+
+        });
 
         for (final Synapse gene : genes) {
 
-            if (gene.enabled) {
+            if (gene.isEnabled()) {
 
-                if (!network.containsKey(gene.output))
-                    network.put(gene.output, new Hidden(gene.output));
+                if (!network.containsKey(gene.getOutput())) {
+                    final Hidden hidden = new Hidden(gene.getOutput());
+                    this.hidden.add(hidden);
+                    this.network.put(gene.getOutput(), hidden);
+                }
 
-                final Neuron neuron = network.get(gene.output);
-                neuron.inputs.add(gene);
+                final Neuron neuron = network.get(gene.getOutput());
+                neuron.getSynapses().add(gene);
 
-                if (!network.containsKey(gene.input))
-                    network.put(gene.input, new Hidden(gene.input));
+                if (!network.containsKey(gene.getInput())){
+                    final Hidden hidden = new Hidden(gene.getInput());
+                    this.hidden.add(hidden);
+                    this.network.put(gene.getInput(), hidden);
+                }
 
             }
 
@@ -57,111 +80,112 @@ public class Network implements Json.Serializable{
     }
 
     public void setInputs(double[] input){
-        for (int i = 0; i < INPUTS; i++)
-            this.getInput(i).value = input[i];
-    }
-
-    public double[] getOutputs(){
-        final double[] output = new double[OUTPUTS];
-        for (int i = 0; i < OUTPUTS; i++)
-            output[i] = this.getOutput(i).value;
-        return output;
+        for (int i = 0; i < INPUTS; i++){
+            this.network.get(i).setValue(input[i]);
+        }
     }
 
     public void evaluate() {
 
         for (final Map.Entry<Integer, Neuron> entry : network.entrySet()) {
 
+            if (entry.getKey() < INPUTS + OUTPUTS)
+                continue;
+
             final Neuron neuron = entry.getValue();
 
-            if(!(neuron instanceof Hidden)){
-                continue;
-            }
-
             double sum = 0.0;
-            for (final Synapse incoming : neuron.inputs) {
-                final Neuron other = network.get(incoming.input);
-                sum += incoming.weight * other.value;
+            for (final Synapse incoming : neuron.getSynapses()) {
+                final Neuron other = this.network.get(incoming.getInput());
+                sum += incoming.getWeight() * other.getValue();
             }
 
-            if (!neuron.inputs.isEmpty())
-                neuron.value = Neuron.sigmoid(sum);
+            if (!neuron.getSynapses().isEmpty()) {
+                neuron.setValue(Neuron.sigmoid(sum));
+            }
+
         }
 
         for (final Map.Entry<Integer, Neuron> entry : network.entrySet()) {
-            if (entry.getKey() < INPUTS || entry.getKey() >= INPUTS + OUTPUTS)
+
+            if (entry.getKey() < INPUTS || entry.getKey() >= INPUTS + OUTPUTS) {
                 continue;
-            final Neuron neuron = entry.getValue();
-            double sum = 0.0;
-            for (final Synapse incoming : neuron.inputs) {
-                final Neuron other = network.get(incoming.input);
-                sum += incoming.weight * other.value;
             }
 
-            if (!neuron.inputs.isEmpty())
-                neuron.value = Neuron.sigmoid(sum);
+            final Neuron neuron = entry.getValue();
+            double sum = 0.0;
+            for (final Synapse incoming : neuron.getSynapses()) {
+                final Neuron other = this.network.get(incoming.getInput());
+                sum += incoming.getWeight() * other.getValue();
+            }
+
+            if (!neuron.getSynapses().isEmpty()) {
+                neuron.setValue(Neuron.sigmoid(sum));
+            }
+
         }
 
     }
 
-    private Neuron getOutput(final int i){
+    public double[] getOutputs(){
+        final double[] output = new double[OUTPUTS];
+        for (int i = 0; i < OUTPUTS; i++) {
+            output[i] = this.network.get(i).getValue();
+        }
+        return output;
+    }
+
+    private Output getOutput(final int i){
         final int id = INPUTS + i;
         if(!isOutput(id)){
-            throw new RuntimeException("IS NOT OUTPUT: " + id);
+            throw new RuntimeException(id + ": is not output");
         }
         Neuron n = this.network.get(id);
         if(n instanceof Output){
-            return n;
+            return (Output) n;
         }
-        throw new RuntimeException("IS NOT OUTPUT: " + id);
+        throw new RuntimeException(id + ": is not output");
     }
 
-    public Neuron getHidden(final int id){
+    public Hidden getHidden(final int id){
         if(isOutput(id)){
-            throw new RuntimeException("IS OUTPUT: " + id);
+            throw new RuntimeException(id + ": is not hidden");
         }else if(isInput(id)){
-            throw new RuntimeException("IS Input: " + id);
+            throw new RuntimeException(id + ": is not hidden");
         }
         Neuron n = this.network.get(id);
         if(!(n instanceof Hidden)){
-            return n;
+            return (Hidden) n;
         }
-        throw new RuntimeException("IS NOT HIDDEN: " + id);
+        throw new RuntimeException(id + ": is not hidden");
     }
 
     public Neuron getNeuron(final int id){ return this.network.get(id); }
 
-    private Neuron getInput(final int i){
+    private Input getInput(final int i){
         if(!isInput(i)){
-            throw new RuntimeException("IS NOT INPUT: " + i);
+            throw new RuntimeException(i + ": is not input: " + Constants.INPUTS + " : " + Util.Inputs.values().length);
         }
         Neuron n = this.network.get(i);
         if(n instanceof Input) {
-            return n;
+            return (Input) n;
         }
-        throw new RuntimeException("IS NOT INPUT: " + i);
+        throw new RuntimeException(i + ": is not input");
     }
 
-    public LinkedList<Neuron> getOutputsNeurons(){
-        final LinkedList<Neuron> out = new LinkedList<Neuron>();
-        for (int i = 0; i < OUTPUTS; i++){
-            out.add(this.network.get(INPUTS + i));
-        }
+    public LinkedList<Input> getInputNeurons(){ return this.inputs; }
 
-        for(Neuron n: out){
-            if(!(n instanceof Output)){
-                throw new RuntimeException("All nodes they aren't outputs");
-            }
-        }
+    public Neuron getBiasNeuron(){ return this.getInput(Util.Inputs.BIAS.ordinal()); }
 
-        return out;
+    public LinkedList<Output> getOutputsNeurons(){ return this.outputs; }
+
+    public LinkedList<Hidden> getHiddenNeurons(){ return this.hidden; }
+
+    public HashMap<Integer, Neuron> getNetwork() { return network; }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        throw new RuntimeException("Network clone");
     }
 
-    public Set<Map.Entry<Integer, Neuron>> entrySet() { return this.network.entrySet(); }
-
-    @Override
-    public void write(Json json) { }
-
-    @Override
-    public void read(Json json, JsonValue jsonData) { }
 }

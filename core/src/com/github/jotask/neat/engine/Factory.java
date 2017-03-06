@@ -5,8 +5,8 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.github.jotask.neat.Neat;
 import com.github.jotask.neat.engine.entity.Entity;
 import com.github.jotask.neat.engine.entity.Player;
-import com.github.jotask.neat.jneat.Genome;
 import com.github.jotask.neat.jneat.NeatEnemy;
+import com.github.jotask.neat.util.JRandom;
 
 /**
  * Factory
@@ -16,10 +16,17 @@ import com.github.jotask.neat.jneat.NeatEnemy;
  */
 public class Factory {
 
+    private static Factory instance;
+
+    public static final Factory get(){
+        return instance;
+    }
+
     private Neat neat;
 
     public Factory(final Neat neat) {
         this.neat = neat;
+        Factory.instance = this;
     }
 
     public final Player getPlayer(){
@@ -51,7 +58,7 @@ public class Factory {
 
     }
 
-    public final NeatEnemy getNeatEnemy(final Genome genome){
+    public final NeatEnemy getNeatEnemy(){
 
         final Vector2 p = JRandom.randomPosition();
         float radius = .5f;
@@ -65,7 +72,7 @@ public class Factory {
 //        RadarEnemy radar = new RadarEnemy();
 //        radarBody.setUserData(radar);
 
-        NeatEnemy enemy = new NeatEnemy(body, genome);
+        NeatEnemy enemy = new NeatEnemy(body);
 
 //        radar.setEnt(enemy);
 

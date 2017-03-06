@@ -1,186 +1,148 @@
 package com.github.jotask.neat.jneat;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonWriter;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.engine.Util;
+import com.github.jotask.neat.engine.Timer;
 import com.github.jotask.neat.jneat.fitness.BasicFitness;
 import com.github.jotask.neat.jneat.fitness.Fitness;
-import com.github.jotask.neat.jneat.gui.Data;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.github.jotask.neat.jneat.Constants.FILE;
+import com.github.jotask.neat.jneat.gui.Gui;
+import com.github.jotask.neat.jneat.gui.NetworkRenderer;
+import com.github.jotask.neat.jneat.gui.Renderer;
 
 /**
  * JNeat
  *
  * @author Jose Vives Iznardo
- * @since 24/02/2017
+ * @since 02/03/2017
  */
-public class JNeat {
+public class JNeat implements Renderer{
 
     final Neat neat;
 
-    public Population pool;
+    final Fitness fitness;
 
-    private Data data;
+    final Population population;
 
-    private Fitness fitness;
+    final EnemyManager manager;
 
-    private NeatEnemy best;
+    NeatEnemy best;
 
-    private List<NeatEnemy> entities;
+    final NetworkRenderer renderer;
 
-    private int alive;
+    final Timer timer;
+
+    final Gui gui;
 
     public JNeat(final Neat neat) {
         this.neat = neat;
-        this.entities = new ArrayList<NeatEnemy>();
-
-        this.data = new Data(neat.getCamera());
-
+        this.manager = new EnemyManager();
         this.fitness = new BasicFitness();
-
-        this.pool = new Population();
-
-        if(!load()){
-            this.pool.init();
-        }
-
+        this.population = new Population();
+        this.population.init();
+        this.timer = new Timer(Constants.INIT_TIME);
+        this.gui = new Gui(this);
+        this.renderer = new NetworkRenderer(this, neat.getGui().getCamera());
         init();
-
     }
 
     public void init(){
-        this.entities.clear();
-        this.alive = 0;
-        for(final Species species: pool.species){
-            for(final Genome genome: species.genomes){
+        this.manager.clear();
+        for(final Species specie: this.population.species){
+            for(final Genome genome: specie.genomes){
                 genome.generateNetwork();
-                NeatEnemy entity = neat.getFactory().getNeatEnemy(genome);
-                this.entities.add(entity);
+                this.manager.spawn(specie, genome);
             }
         }
     }
 
     public void evaluate(){
-        for (final NeatEnemy entities : entities) {
 
-            if (entities.isDie())
+        for(final NeatEnemy e: this.manager.getActive()){
+
+            if(e.isDie() || e.isDisabled()){
                 continue;
+            }
 
-            final double[] input = entities.getInput();
-            final double[] output = entities.getGenome().evaluateNetwork(input);
-            entities.setOutput(output);
+            final double input[] = e.getInputs();
+            final double output[] = e.getGenome().evaluateNetwork(input);
+            e.setOutput(output);
 
         }
     }
 
-    public void learn() {
+    public void learn(){
 
-        this.setBest(entities.get(0));
+        this.setBest(this.manager.getActive().getFirst());
 
-        boolean allDead = true;
+        for(final NeatEnemy e: this.manager.getActive()){
 
-        alive = entities.size();
-
-        for (final NeatEnemy e : entities) {
-
-            if (e.isDie()) {
-                alive--;
+            if(e.isDie() || e.isDisabled()){
+                System.out.println("Bye entity in learn");
                 continue;
             }
 
-            allDead = false;
-
-            // TODO improve fitness
             double fitness = this.fitness.evaluate(e);
 
-            fitness = (fitness == 0.0) ? -1.0 : fitness;
-
-            e.getGenome().fitness = fitness;
-
-            if (fitness > pool.maxFitness) {
-                pool.maxFitness = fitness;
+            if(fitness == 0.0){
+                fitness = -1.0;
             }
 
-            if (fitness > best.getGenome().fitness){
+            e.getGenome().setFitness(fitness);
+
+            this.population.isMaxFitness(fitness);
+
+            if(fitness > best.getGenome().getFitness()){
                 this.setBest(e);
             }
 
         }
 
-        if (allDead) {
-            data.addFitness(pool.generation, best.getGenome().fitness);
-            save();
-            pool.newGeneration();
-            init();
+        if(timer.isPassed(true)){
+            this.gui.getFitness().addFitness(this.population.generation, this.best.getGenome().getFitness());
+            this.manager.clear();
+            this.fitness.reset();
+            this.population.newGeneration();
+            this.init();
             Neat.get().getPlayer().respawn();
-            fitness.reset();
         }
 
+    }
+
+    public void dispose(){
+        this.manager.dispose();
+    }
+
+    @Override
+    public void render(SpriteBatch sb) {
+        sb.begin();
+        this.gui.render(sb);
+        this.renderer.render(sb);
+        sb.end();
+    }
+
+    @Override
+    public void debug(ShapeRenderer sr) {
+        sr.begin();
+        this.gui.debug(sr);
+        this.renderer.debug(sr);
+        sr.end();
     }
 
     private void setBest(final NeatEnemy e){
-
-        if(best!= null)
-            best.isBest = false;
-
-        best = e;
-
-        best.isBest = true;
-
+        if(this.best != null)
+            this.best.isBest = false;
+        this.best = e;
+        this.best.isBest = true;
+        this.renderer.createNetwork(e);
     }
 
-    public void render(final SpriteBatch sb, final ShapeRenderer sr){
+    public Population getPopulation() { return population; }
 
-        best.drawNetwork(neat.getCamera(), sb, sr);
-
+    public NeatEnemy getBest() {
+        return best;
     }
 
-    public void dispose(){ }
-
-    public int getAlive(){ return this.alive; }
-
-    public int getGeneration() { return this.pool.generation; }
-
-    public void save(){
-
-        Json json = new Json(JsonWriter.OutputType.json);
-
-        final String s = json.prettyPrint(this.pool);
-        final String ss = json.toJson(this.pool);
-
-//        final FileHandle internal = Gdx.files.local(file);
-//        internal.writeString(s, false);
-//
-//        final FileHandle intern = Gdx.files.local("data/genome.min.json");
-//        intern.writeString(ss, false);
-    }
-
-    public boolean load(){
-        final FileHandle internal = Gdx.files.local(FILE);
-        if(!internal.exists()){
-            return false;
-        }else{
-            return false;
-        }
-
-//        final String s = internal.readString();
-//
-//        Json json = new Json(JsonWriter.OutputType.json);
-//        Genome g = json.fromJson(Genome.class, s);
-//        return true;
-    }
-
-    public String getMaxFitness(){ return String.valueOf(Util.cutDecimals(this.pool.maxFitness, 2)); }
-
-    public Data getData() { return data; }
+    public EnemyManager getManager() { return manager; }
 
 }

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.github.jotask.neat.engine.JRandom;
+import com.github.jotask.neat.util.JRandom;
 import com.github.jotask.neat.engine.controller.PlayerController;
 
 /**
@@ -39,7 +39,7 @@ public class Player extends Entity{
     @Override
     public void debug(ShapeRenderer sr) {
         sr.set(ShapeRenderer.ShapeType.Filled);
-        sr.setColor(Color.LIME);
+        sr.setColor(Color.BLACK);
         sr.circle(getBody().getPosition().x, getBody().getPosition().y, .5f, 20);
     }
 

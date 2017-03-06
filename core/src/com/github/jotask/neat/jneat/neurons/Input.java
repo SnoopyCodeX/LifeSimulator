@@ -1,16 +1,22 @@
- package com.github.jotask.neat.jneat.neurons;
+package com.github.jotask.neat.jneat.neurons;
+
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
 /**
  * Input
  *
  * @author Jose Vives Iznardo
- * @since 27/02/2017
+ * @since 02/03/2017
  */
-public class Input extends Neuron {
+public class Input extends Neuron{
 
     public Input(int id) {
-        super(id, Type.INPUT);
-//        System.out.println("INPUT: " + id);
+        super(id);
+    }
+
+    public void render(final SpriteBatch sb, final ShapeRenderer sr){
+
     }
 
 }

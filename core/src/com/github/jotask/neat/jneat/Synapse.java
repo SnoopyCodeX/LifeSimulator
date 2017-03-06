@@ -1,51 +1,77 @@
 package com.github.jotask.neat.jneat;
 
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
+import com.github.jotask.neat.jneat.neurons.Neuron;
 
-import static com.github.jotask.neat.jneat.NeatUtil.isOutput;
+/**
+ * Synapse
+ *
+ * A Synapse is a link between two neurons
+ *
+ * @author Jose Vives Iznardo
+ * @since 02/03/2017
+ */
+public class Synapse{
 
-// A synapse is a link between two neurons
-public class Synapse implements Json.Serializable, Comparable<Synapse>{
+    private int input;
+    private int output;
 
-    public int input = 0;
-    public int output = 0;
-    public double weight = 0.0;
-    public boolean enabled = true;
-    public int innovation = 0;
+    private double weight;
+    private boolean enabled;
 
-    public Synapse(){};
+    private int innovation;
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    @Override
-    public Synapse clone() {
-        final Synapse synapse = new Synapse();
-        synapse.input = this.input;
-        synapse.output = this.output;
-        synapse.weight = this.weight;
-        synapse.enabled = this.enabled;
-        synapse.innovation = this.innovation;
-        return synapse;
+    public Synapse(final Integer input, final Integer output) {
+        this.input = input;
+        this.output = output;
+        this.weight = 0f;
+        this.enabled = true;
+        this.innovation = 0;
     }
 
-    public boolean isOut(){ return(isOutput(this.input) && isOutput(this.output)); }
-
-    @Override
-    public void write(Json json) {
-        json.writeValue("input", input, Integer.class);
-        json.writeValue("output", output, Integer.class);
-        json.writeValue("weight", weight, Double.class);
-        json.writeValue("enabled", enabled, Boolean.class);
-        json.writeValue("innovation", innovation, Integer.class);
+    Synapse(final Synapse syn) {
+        this.input = syn.input;
+        this.output = syn.output;
+        this.weight = syn.weight;
+        this.enabled = syn.enabled;
+        this.innovation = syn.innovation;
     }
 
-    @Override
-    public void read(Json json, JsonValue jsonData) {
+    public int getInput() { return input; }
 
+    public int getOutput() { return output; }
+
+    public double getWeight() { return weight; }
+
+    void setWeight(double weight) { this.weight = weight; }
+
+    void addWeight(double toAdd){
+        double tmp =(getWeight() + toAdd);
+        this.setWeight(tmp);
     }
 
+    int getInnovation() { return innovation; }
+
+    public void setInnovation(int innovation) { this.innovation = innovation; }
+
+    public boolean isEnabled() { return enabled; }
+
+    void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+    public void setInput(final int input) { this.input = input; }
+
+    public void setOutput(final int output) { this.output = output; }
+
     @Override
-    public int compareTo(Synapse other) {
-        return this.output - other.output;
+    protected Synapse clone() throws CloneNotSupportedException {
+        throw new RuntimeException("Synapse clone");
     }
+
+    public static final boolean inputs(final Synapse syn){
+        return (Neuron.isInput(syn.getInput()) && Neuron.isInput(syn.getOutput()));
+    }
+
+    public static final boolean outputs(final Synapse syn){
+        return (Neuron.isOutput(syn.getInput()) && Neuron.isOutput(syn.getOutput()));
+    }
+
 }

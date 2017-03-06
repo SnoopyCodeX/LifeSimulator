@@ -12,6 +12,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.github.jotask.neat.engine.*;
 import com.github.jotask.neat.engine.entity.Player;
+import com.github.jotask.neat.jneat.Constants;
 import com.github.jotask.neat.jneat.JNeat;
 
 import static com.badlogic.gdx.Gdx.gl;
@@ -22,8 +23,6 @@ public class Neat extends ApplicationAdapter {
 	public static Neat get(){ return instance; }
 
 	final Color b = Color.WHITE;
-
-	final int FOOD = 10;
 
 	SpriteBatch sb;
 	ShapeRenderer sr;
@@ -111,19 +110,19 @@ public class Neat extends ApplicationAdapter {
 		player.debug(sr);
 		sr.end();
 
+
 		gl.glEnable(GL20.GL_BLEND);
 		gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
-		sb.begin();
-		sr.begin();
-		neat.render(sb, sr);
-		neat.getData().render(sb, sr);
-		sr.end();
-		sb.end();
 
-		gl.glDisable(GL20.GL_BLEND);
+		sb.setProjectionMatrix(this.getGui().getCamera().combined);
+		sr.setProjectionMatrix(this.getGui().getCamera().combined);
 
-		gui.render(sb);
+		if(Constants.DRAW) {
+			neat.render(sb);
+			neat.debug(sr);
+			gui.render(sb);
+		}
 
 	}
 	
@@ -149,5 +148,7 @@ public class Neat extends ApplicationAdapter {
 	public Camera getCamera() { return camera; }
 
 	public Player getPlayer() { return player; }
+
+	public Gui getGui() { return gui; }
 
 }

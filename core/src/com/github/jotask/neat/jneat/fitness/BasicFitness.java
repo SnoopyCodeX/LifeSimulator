@@ -6,7 +6,7 @@ import com.github.jotask.neat.jneat.NeatEnemy;
  * BasicFitness
  *
  * @author Jose Vives Iznardo
- * @since 01/03/2017
+ * @since 02/03/2017
  */
 public class BasicFitness implements Fitness {
 

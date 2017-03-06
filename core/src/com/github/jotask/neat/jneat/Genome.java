@@ -1,257 +1,272 @@
 package com.github.jotask.neat.jneat;
 
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
+import com.github.jotask.neat.jneat.neurons.Neuron;
+import com.github.jotask.neat.util.JRandom;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.github.jotask.neat.engine.JRandom.random;
-import static com.github.jotask.neat.jneat.Constants.*;
-import static com.github.jotask.neat.jneat.NeatUtil.isOutput;
+import static com.github.jotask.neat.jneat.Constants.BIAS_MUTATION;
+import static com.github.jotask.neat.jneat.Constants.CONN_MUTATION;
+import static com.github.jotask.neat.jneat.Constants.DELTA_DISJOINT;
+import static com.github.jotask.neat.jneat.Constants.DELTA_THRESHOLD;
+import static com.github.jotask.neat.jneat.Constants.DELTA_WEIGHTS;
+import static com.github.jotask.neat.jneat.Constants.DISABLE_MUTATION;
+import static com.github.jotask.neat.jneat.Constants.ENABLE_MUTATION;
+import static com.github.jotask.neat.jneat.Constants.LINK_MUTATION;
+import static com.github.jotask.neat.jneat.Constants.NODE_MUTATION;
+import static com.github.jotask.neat.jneat.Constants.PERTURBATION;
+import static com.github.jotask.neat.jneat.Constants.STEP_SIZE;
+import static com.github.jotask.neat.jneat.test.neat.Pool.INPUTS;
+import static com.github.jotask.neat.jneat.test.neat.Pool.OUTPUTS;
+import static com.github.jotask.neat.jneat.test.neat.Pool.*;
 
-public class Genome implements Json.Serializable, Comparable<Genome>{
+/**
+ * Genome
+ *
+ * @author Jose Vives Iznardo
+ * @since 02/03/2017
+ */
+public class Genome{
 
-    public final List<Synapse> genes = new ArrayList<Synapse>();
-    public double fitness = 0.0;
+    private final List<Synapse> genes;
+    private double fitness = 0.0;
+    private int globalRank = 0;
 
-    // FIXME maxNeuron
-    // maxNeuron = network.neurons < OUTPUTS  (maybe)
-    public int maxNeuron = 0;
+    private Network network = null;
 
-    public int globalRank = 0;
-    public final double[] mutationRates = new double[] { CONN_MUTATION, LINK_MUTATION, BIAS_MUTATION, NODE_MUTATION, ENABLE_MUTATION, DISABLE_MUTATION, STEP_SIZE };
-    public Network network = null;
+    /**
+     * Default constructor to initialize variables
+     */
+    public Genome(){
+         this.genes = new ArrayList<Synapse>();
+    }
 
-    public Genome() {}
+    /**
+     * Copy constructor
+     * @param genome
+     */
+    public Genome(final Genome genome){
+        this();
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    @Override
-    public Genome clone() {
-        final Genome genome = new Genome();
+        for (final Synapse gene : genes) {
+            genome.genes.add(new Synapse(gene));
+        }
 
-        for (final Synapse gene : genes)
-            genome.genes.add(gene.clone());
+    }
 
-        genome.maxNeuron = maxNeuron;
-
-        for (int i = 0; i < mutationRates.length; ++i)
-            genome.mutationRates[i] = mutationRates[i];
-
-        return genome;
+    public void generateNetwork(){
+        this.network = new Network(this.genes);
     }
 
     public boolean containsLink(final Synapse link) {
-        for (final Synapse gene : genes)
-            if (gene.input == link.input && gene.output == link.output)
+        for (final Synapse gene : genes) {
+            if (gene.getInput() == link.getInput() && gene.getOutput() == link.getOutput()) {
                 return true;
+            }
+        }
         return false;
     }
 
     public double disjoint(final Genome genome) {
         double disjointGenes = 0.0;
         search: for (final Synapse gene : genes) {
-            for (final Synapse otherGene : genome.genes)
-                if (gene.innovation == otherGene.innovation)
+            for (final Synapse otherGene : genome.genes) {
+                if (gene.getInnovation() == otherGene.getInnovation()) {
                     continue search;
-            ++disjointGenes;
+                }
+                disjointGenes++;
+            }
         }
         return disjointGenes / Math.max(genes.size(), genome.genes.size());
     }
 
-    /**
-     * Evaluate the network
-     * @param input the inputs from the entity
-     * @return outputs evaluated from the network
-     */
     public double[] evaluateNetwork(final double[] input) {
-        network.setInputs(input);
-        network.evaluate();
-        return network.getOutputs();
+        this.network.setInputs(input);
+        this.network.evaluate();
+        return this.network.getOutputs();
     }
 
-    /**
-     * Generate the Network
-     */
-    public void generateNetwork() { network = new Network(this.genes); }
-
-    /**
-     * Check if two outputs are connected
-     */
     private void check(){
-        for(Synapse s: genes){
-            if(s.isOut()){
+        for(Synapse s: this.genes){
+            if(Synapse.inputs(s))
+                throw new RuntimeException("Two inputs connected");
+            if(Synapse.outputs(s))
                 throw new RuntimeException("Two outputs connected");
-            }
         }
     }
 
     public void mutate() {
 
-        // FIXME here is were the outputs neurons connect
         check();
+        System.out.println("mutate.enter");
 
-        for (int i = 0; i < mutationRates.length; i++)
-            mutationRates[i] *= random.nextBoolean() ? 0.95 : 1.05263;
-
-        if (random.nextDouble() < mutationRates[0])
+        if (JRandom.random() < CONN_MUTATION)
             mutatePoint();
 
-        double prob = mutationRates[1];
+        if (JRandom.random() < LINK_MUTATION)
+            mutateLink(false);
 
+        if (JRandom.random() < BIAS_MUTATION)
+            mutateLink(true);
 
-        while (prob > 0) {
-            if (random.nextDouble() < prob)
-                mutateLink(false);
-            --prob;
-        }
+        if (JRandom.random() < NODE_MUTATION)
+            mutateNode();
 
-        prob = mutationRates[2];
-        while (prob > 0) {
-            if (random.nextDouble() < prob)
-                mutateLink(true);
-            --prob;
-        }
+        if (JRandom.random() < ENABLE_MUTATION)
+            mutateEnableDisable(true);
 
-        prob = mutationRates[3];
-        while (prob > 0) {
-            if (random.nextDouble() < prob)
-                mutateNode();
-            --prob;
-        }
+        if (JRandom.random() < DISABLE_MUTATION)
+            mutateEnableDisable(false);
 
-        prob = mutationRates[4];
-        while (prob > 0) {
-            if (random.nextDouble() < prob)
-                mutateEnableDisable(true);
-            --prob;
-        }
-
-        prob = mutationRates[5];
-        while (prob > 0) {
-            if (random.nextDouble() < prob)
-                mutateEnableDisable(false);
-            --prob;
-        }
         check();
+        System.out.println("mutate.exit");
+
     }
 
     public void mutateEnableDisable(final boolean enable) {
-
+        check();
+        System.out.println("mutateEnableDisable.enter : " + enable);
         final List<Synapse> candidates = new ArrayList<Synapse>();
-        for (final Synapse gene : genes)
-            if (gene.enabled != enable)
+        for (final Synapse gene : genes){
+            if (gene.isEnabled() != enable) {
                 candidates.add(gene);
+            }
+        }
 
-        if (candidates.isEmpty())
+        if (candidates.isEmpty()) {
             return;
+        }
 
-        final Synapse gene = candidates.get(random.nextInt(candidates.size()));
-        gene.enabled = !gene.enabled;
+        final Synapse gene = candidates.get(JRandom.random.nextInt(candidates.size()));
+        gene.setEnabled(!gene.isEnabled());
+        check();
+        System.out.println("mutateEnableDisable.exit : " + enable);
 
     }
 
     public void mutateLink(final boolean forceBias) {
 
-        int neuron1;
-        int neuron2;
+        check();
+        System.out.println("mutateLink.enter : forceBias = " + forceBias);
 
-        do{
-            neuron1 = randomNeuron(false, true);
-            neuron2 = randomNeuron(true, false);
-        }while((isOutput(neuron1) && isOutput(neuron2)));
+        final int neuron1 = randomNeuron(false, true);
+        final int neuron2 = randomNeuron(true, false);
 
-        // FIXME sometimes creates a link with empty connection
-        final Synapse newLink = new Synapse();
-
-            newLink.input = neuron1;
-            newLink.output = neuron2;
+        final Synapse newLink = new Synapse(neuron1, neuron2);
 
         if (forceBias)
-            newLink.input = INPUTS - 1;
+            newLink.setInput(INPUTS - 1);
 
-        if (containsLink(newLink))
+        if (containsLink(newLink)) {
+            System.out.println("Link already existed");
             return;
+        }
 
-        newLink.innovation = ++Population.innovation;
-        newLink.weight = random.nextDouble() * 4.0 - 2.0;
+        newLink.setInnovation(++Population.innovation);
+        newLink.setWeight(rnd.nextDouble() * 4.0 - 2.0);
 
         genes.add(newLink);
+
+        check();
+        System.out.println("mutateLink.exit : " + forceBias);
 
     }
 
     public void mutateNode() {
 
-        // FIXME improve
-//        check();
-//        System.out.println("enter");
+        check();
+        System.out.println("mutateNode.enter");
 
         if (genes.isEmpty())
             return;
 
-        final Synapse gene = genes.get(random.nextInt(genes.size()));
+        final Synapse gene = genes.get(JRandom.random.nextInt(genes.size()));
 
-        if (!gene.enabled)
+        if (!gene.isEnabled())
             return;
 
-        gene.enabled = false;
+        gene.setEnabled(false);
 
-        ++maxNeuron;
+//        Output out = this.network.getOutputsNeurons().get(JRandom.randomIndex(this.network.getOutputsNeurons()));
+        final List<Integer> outputIndexes = this.getOutputIndexes();
+        Integer out = outputIndexes.get(JRandom.randomIndex(outputIndexes));
 
-        // TODO Mutate nodes properly
+        final int a = gene.getInput();
+        final int b = gene.getOutput();
 
-        // FIXME
-        if(isOutput(maxNeuron)){
-            System.out.println("Genome[200]: " + gene.input + " : " + gene.output);
-//            return;
+        if( (!Neuron.isOutput(a)) && (!Neuron.isInput(a)) ) {
+            final Synapse gene1 = new Synapse(gene);
+            gene1.setOutput(out);
+            gene1.setWeight(1.0);
+            gene1.setInnovation(++Population.innovation);
+            gene1.setEnabled(true);
+            genes.add(gene1);
         }
 
-        final Synapse gene1 = gene.clone();
-        gene1.output = maxNeuron;
-        gene1.weight = 1.0;
-        gene1.innovation = ++Population.innovation;
-        gene1.enabled = true;
-        genes.add(gene1);
+        if( (!Neuron.isInput(b)) && (!Neuron.isOutput(b)) ) {
+            final Synapse gene2 = new Synapse(gene);
+            gene2.setInput(out);
+            gene2.setInnovation(++Population.innovation);
+            gene2.setEnabled(true);
+            genes.add(gene2);
+        }
 
-        final Synapse gene2 = gene.clone();
-        gene2.input = maxNeuron;
-        gene2.innovation = ++Population.innovation;
-        gene2.enabled = true;
-        genes.add(gene2);
-
-//        check();
-//        System.out.println("exit");
+        check();
+        System.out.println("mutateNode.exit");
 
     }
 
     public void mutatePoint() {
-        for (final Synapse gene : genes)
-            if (random.nextDouble() < PERTURBATION)
-                gene.weight += random.nextDouble() * mutationRates[6] * 2.0
-                        - mutationRates[6];
-            else
-                gene.weight = random.nextDouble() * 4.0 - 2.0;
+        check();
+        System.out.println("mutatePoint.enter");
+        for (final Synapse gene : genes) {
+            if (JRandom.random() < PERTURBATION) {
+                gene.addWeight(JRandom.random.nextDouble() * STEP_SIZE * 2.0 - STEP_SIZE);
+            } else {
+                gene.setWeight(JRandom.random.nextDouble() * 4.0 - 2.0);
+            }
+        }
+        check();
+        System.out.println("mutatePoint.exit");
+    }
+
+    public List<Integer> getInputsIndexes(){
+        final List<Integer> neurons = new ArrayList<Integer>();
+        for (int i = 0; i < INPUTS; i++) {
+            neurons.add(i);
+        }
+        return neurons;
+    }
+
+    public List<Integer> getOutputIndexes(){
+        final List<Integer> neurons = new ArrayList<Integer>();
+        for (int i = 0; i < OUTPUTS; i++) {
+            neurons.add(INPUTS + i);
+        }
+        return neurons;
     }
 
     public int randomNeuron(final boolean nonInput, final boolean nonOutput) {
         final List<Integer> neurons = new ArrayList<Integer>();
 
-        if (!nonInput)
-            for (int i = 0; i < INPUTS; ++i)
-                neurons.add(i);
+        if (!nonInput) { neurons.addAll(this.getInputsIndexes()); }
 
-        if (!nonOutput)
-            for (int i = 0; i < OUTPUTS; ++i)
-                neurons.add(INPUTS + i);
+        if (!nonOutput) { neurons.addAll(this.getOutputIndexes()); }
 
         for (final Synapse gene : genes) {
-            if ((!nonInput || gene.input >= INPUTS) && (!nonOutput || gene.input >= INPUTS + OUTPUTS))
-                neurons.add(gene.input);
-            if ((!nonInput || gene.output >= INPUTS) && (!nonOutput || gene.output >= INPUTS + OUTPUTS))
-                neurons.add(gene.output);
+            if ((!nonInput || gene.getInput() >= INPUTS) && (!nonOutput || gene.getInput() >= INPUTS + OUTPUTS)) {
+                neurons.add(gene.getInput());
+            }
+            if ((!nonInput || gene.getOutput() >= INPUTS) && (!nonOutput || gene.getOutput() >= INPUTS + OUTPUTS)) {
+                neurons.add(gene.getOutput());
+            }
         }
 
-        return neurons.get(random.nextInt(neurons.size()));
+        Integer integer = neurons.get(JRandom.random.nextInt(neurons.size()));
+
+        return integer;
+
     }
 
     public boolean sameSpecies(final Genome genome) {
@@ -263,37 +278,34 @@ public class Genome implements Json.Serializable, Comparable<Genome>{
     public double weights(final Genome genome) {
         double sum = 0.0;
         double coincident = 0.0;
-        search: for (final Synapse gene : genes)
-            for (final Synapse otherGene : genome.genes)
-                if (gene.innovation == otherGene.innovation) {
-                    sum += Math.abs(gene.weight - otherGene.weight);
-                    ++coincident;
+        search: for (final Synapse gene : genes) {
+            for (final Synapse otherGene : genome.genes) {
+                if (gene.getInnovation() == otherGene.getInnovation()) {
+                    sum += Math.abs(gene.getWeight() - otherGene.getWeight());
+                    coincident++;
                     continue search;
                 }
+            }
+        }
         return sum / coincident;
     }
 
-    @Override
-    public void write(Json json) {
-        json.writeValue("fitness", fitness, Double.class);
-        json.writeValue("maxNeuron", maxNeuron, Integer.class);
-        json.writeValue("globalRank", globalRank, Integer.class);
-//        json.writeValue(network);
-        json.writeArrayStart("synapse");
-        for(Synapse s: this.genes){
-            json.writeValue(s);
-        }
-        json.writeArrayEnd();
-    }
+    // GETTERS AND SETTERS
+
+    public List<Synapse> getGenes() { return genes; }
+
+    public double getFitness() { return fitness; }
+
+    public void setFitness(double fitness) { this.fitness = fitness; }
+
+    public int getGlobalRank() { return globalRank; }
+
+    public void setGlobalRank(int globalRank) { this.globalRank = globalRank; }
 
     @Override
-    public void read(Json json, JsonValue jsonData) {
-
+    public Genome clone() {
+        throw new RuntimeException("Genome Clone");
     }
 
-    @Override
-    public int compareTo(Genome other) {
-        final double cmp = other.fitness - this.fitness;
-        return cmp == 0.0 ? 0 : cmp > 0.0 ? 1 : -1;
-    }
+    public Network getNetwork() { return network; }
 }

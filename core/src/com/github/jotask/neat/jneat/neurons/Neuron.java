@@ -1,31 +1,41 @@
 package com.github.jotask.neat.jneat.neurons;
 
+import com.github.jotask.neat.jneat.Constants;
 import com.github.jotask.neat.jneat.Synapse;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 
-public abstract class Neuron{
+/**
+ * Neuron
+ *
+ * @author Jose Vives Iznardo
+ * @since 02/03/2017
+ */
+public abstract class Neuron {
 
-    public static double sigmoid(final double x) {
-        return 2.0 / (1.0 + Math.exp(-4.9 * x)) - 1.0;
-    }
-
-    public enum Type { INPUT, HIDDEN, OUTPUT }
-
-    public final Type type;
+    public static double sigmoid(final double x) { return 2.0 / (1.0 + Math.exp(-4.9 * x)) - 1.0; }
 
     private final int id;
 
-    public double value = 0.0;
+    private double value;
 
-    public final List<Synapse> inputs = new ArrayList<Synapse>();
+    private final LinkedList<Synapse> inputs;
 
-    public Neuron(final int id, final Type type) {
+    public Neuron(final int id){
         this.id = id;
-        this.type = type;
+        this.inputs = new LinkedList<Synapse>();
     }
 
     public int getId() { return id; }
+
+    public double getValue() { return value; }
+
+    public void setValue(double value) { this.value = value; }
+
+    public LinkedList<Synapse> getSynapses() { return inputs; }
+
+    public static final boolean isInput(final int id){ return (id < Constants.INPUTS); }
+
+    public static final boolean isOutput(final int id){ return (id >= Constants.INPUTS && id < Constants.INPUTS + Constants.OUTPUTS); }
 
 }

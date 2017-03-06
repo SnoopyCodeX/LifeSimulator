@@ -1,7 +1,8 @@
-package com.github.jotask.neat.engine;
+package com.github.jotask.neat.util;
 
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.Collection;
 import java.util.Random;
 
 /**
@@ -44,5 +45,7 @@ public final class JRandom {
         float y = random(-HEIGHT + offset, HEIGHT - offset);
         return new Vector2(x, y);
     }
+
+    public static int randomIndex(final Collection c){ return random.nextInt(c.size()); }
 
 }

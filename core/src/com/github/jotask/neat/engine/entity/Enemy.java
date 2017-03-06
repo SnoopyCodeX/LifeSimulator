@@ -40,9 +40,9 @@ public class Enemy extends Entity{
         this.getBody().applyForceToCenter(this.velocity.scl(SPEED), true);
 
         velocity.setZero();
-        if(timer.isPassed()){
-            this.die = true;
-        }
+//        if(timer.isPassed()){
+//            this.die = true;
+//        }
 
     }
 
