@@ -1,23 +1,22 @@
-package com.github.jotask.neat.jneat;
-
-import com.github.jotask.neat.jneat.neurons.Output;
+package com.github.jotask.neat.jneat.util;
 
 /**
- * Constants
+ * Ref
  *
  * @author Jose Vives Iznardo
- * @since 01/03/2017
+ * @since 10/03/2017
  */
-public class Constants {
+public class Ref {
 
-    // Enemies TIME
-    public static final float INIT_TIME = 1f;
+    public enum Inputs { enemy_x, enemy_y, player_x, player_y, bias }
 
-    // Population
+    public enum Outputs{ left, right, up, down }
+
+    public static final int INPUTS = Inputs.values().length;
+    public static final int OUTPUTS = Outputs.values().length;
+
     public static final int POPULATION    = 50;
     public static final int STALE_SPECIES = 15;
-    public static final int INPUTS        = 4;
-    public static final int OUTPUTS       = Output.OUTPUT.values().length;
 
     public static final double DELTA_DISJOINT  = 2.0;
     public static final double DELTA_WEIGHTS   = 0.4;
@@ -33,9 +32,8 @@ public class Constants {
     public static final double PERTURBATION     = 0.9;
     public static final double CROSSOVER        = 0.75;
 
-    // JNeat
+    public static final double THRESHOLD = 0.5;
 
-    public static final String FILE = "data/genome.json";
-    public static final float THRESHOLD = .75f;
+    public static final float INIT_TIME = 1f;
 
 }

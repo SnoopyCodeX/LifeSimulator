@@ -27,14 +27,6 @@ public class CollisionFilter {
 
     private static class MASK {
 
-//        public static final short WALLS = -1;
-//        public static final short PLAYER = CATEGORY.WALLS | CATEGORY.ENEMY | CATEGORY.ENEMY_FRIEND | CATEGORY.ENEMY_RADAR;
-//        public static final short ENEMY = CATEGORY.WALLS | CATEGORY.PLAYER | CATEGORY.PLAYER_FRIEND | CATEGORY.PLAYER_RADAR;
-//        public static final short PLAYER_FRIEND = ~CATEGORY.PLAYER;
-//        public static final short ENEMY_FRIEND = ~CATEGORY.ENEMY;
-//        public static final short PLAYER_RADAR = CATEGORY.ENEMY;
-//        public static final short ENEMY_RADAR = CATEGORY.PLAYER;
-
         public static final short WALLS = -1;
         public static final short PLAYER = CATEGORY.WALLS;
         public static final short ENEMY = CATEGORY.WALLS;
