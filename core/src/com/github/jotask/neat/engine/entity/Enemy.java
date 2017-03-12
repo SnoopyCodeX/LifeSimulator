@@ -4,9 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.github.jotask.neat.engine.Timer;
 import com.github.jotask.neat.engine.controller.EnemyController;
-import com.github.jotask.neat.jneat.Constants;
 
 /**
  * Enemy
@@ -22,13 +20,10 @@ public class Enemy extends Entity{
 
     public final float SPEED = 10;
 
-    private final Timer timer;
-
     public Enemy(final Body body) {
         super(body);
         this.controller = new EnemyController(this);
         this.velocity = new Vector2();
-        this.timer = new Timer(Constants.INIT_TIME);
     }
 
     @Override
@@ -40,16 +35,7 @@ public class Enemy extends Entity{
         this.getBody().applyForceToCenter(this.velocity.scl(SPEED), true);
 
         velocity.setZero();
-//        if(timer.isPassed()){
-//            this.die = true;
-//        }
 
-    }
-
-    public void eat(final Food food){
-        float getValue = food.getValue();
-        timer.add(getValue);
-        food.eaten();
     }
 
     @Override
