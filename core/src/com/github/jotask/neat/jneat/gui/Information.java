@@ -77,14 +77,14 @@ public class Information implements Renderer {
             void set() { this.t = neat.getPopulation(); }
         };
 
-        new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Genomes") {
-            @Override
-            void set() { this.t = neat.getGenomes(); }
-        };
-
         new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Active") {
             @Override
-            void set() { this.t = neat.getManager().getActive().size(); }
+            void set() { this.t = neat.getManager().manyActived(); }
+        };
+
+        new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Disabled") {
+            @Override
+            void set() { this.t = neat.getManager().manyDisabled(); }
         };
 
         new Inform<Double>(this.info, font, x, y - SPACE * i++, "MaxFitness" ) {

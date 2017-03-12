@@ -1,12 +1,15 @@
 package com.github.jotask.neat.jneat.genetics;
 
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
+
 /**
  * Synapse
  *
  * @author Jose Vives Iznardo
  * @since 10/03/2017
  */
-public class Synapse {
+public class Synapse implements Json.Serializable{
 
     private int input;
     private int output;
@@ -72,4 +75,21 @@ public class Synapse {
         this.innovation = innovation;
     }
 
+    @Override
+    public void write(Json json) {
+        json.writeValue("input", this.input);
+        json.writeValue("output", this.output);
+        json.writeValue("enabled", this.enabled);
+        json.writeValue("weight", this.weight);
+        json.writeValue("innovation", this.innovation);
+    }
+
+    @Override
+    public void read(Json json, JsonValue data) {
+        this.input = data.getInt("input");
+        this.output = data.getInt("output");
+        this.enabled = data.getBoolean("enabled");
+        this.weight = data.getDouble("weight");
+        this.innovation = data.getInt("innovation");
+    }
 }

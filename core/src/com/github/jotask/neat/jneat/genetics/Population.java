@@ -1,5 +1,7 @@
 package com.github.jotask.neat.jneat.genetics;
 
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.util.JRandom;
 
@@ -13,7 +15,7 @@ import java.util.LinkedList;
  * @author Jose Vives Iznardo
  * @since 10/03/2017
  */
-public class Population {
+public class Population implements Json.Serializable{
 
     public static int innovation;
 
@@ -224,4 +226,23 @@ public class Population {
     }
 
     public LinkedList<Specie> getSpecies() { return species; }
+
+    @Override
+    public void write(Json json) {
+        json.writeValue("generation", this.generation);
+        json.writeValue("maxFitness", this.maxFitness);
+        json.writeValue("innovation", Population.innovation);
+        json.writeValue("Species", this.species);
+    }
+
+    @Override
+    public void read(Json json, JsonValue data) {
+        this.generation = data.getInt("generation");
+        this.maxFitness = data.getDouble("maxFitness");
+        this.innovation = data.getInt("innovation");
+        for (JsonValue v : data.get("Species")) {
+            Specie s = json.readValue(Specie.class, v);
+            species.add(s);
+        }
+    }
 }

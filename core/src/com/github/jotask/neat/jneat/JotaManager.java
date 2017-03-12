@@ -56,15 +56,20 @@ public final class JotaManager {
         final int row = 3;
         final float spaceX = 1f;
         int c = 0;
-        int spaceY = 5;
+        float spaceY = 7.5f;
         for(final NeatEnemy e: this.disabled){
             if(row <= c){
                 spaceY--;
                 c = 0;
             }
-            float x = 15 + (spaceX * c++);
+            float x = 26.5f + (spaceX * c++);
             float y = spaceY;
             e.getBody().setTransform(x, y, e.getBody().getAngle());
         }
     }
+
+    public int manyActived(){ return this.active.size(); }
+
+    public int manyDisabled(){ return this.disabled.size(); }
+
 }

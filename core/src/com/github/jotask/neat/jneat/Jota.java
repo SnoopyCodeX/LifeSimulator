@@ -8,10 +8,11 @@ import com.github.jotask.neat.jneat.fitness.BasicFitness;
 import com.github.jotask.neat.jneat.fitness.Fitness;
 import com.github.jotask.neat.jneat.genetics.Population;
 import com.github.jotask.neat.jneat.genetics.Specie;
-import com.github.jotask.neat.jneat.gui.Renderer;
 import com.github.jotask.neat.jneat.gui.Gui;
+import com.github.jotask.neat.jneat.gui.Renderer;
 import com.github.jotask.neat.jneat.network.NetworkRenderer;
 import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.util.Files;
 
 /**
  * Jota
@@ -40,8 +41,9 @@ public class Jota implements Renderer {
         this.manager = new JotaManager();
         this.gui = new Gui(this);
         this.renderer = new NetworkRenderer(this);
-        this.population = new Population();
-        this.population.initialize();
+
+        this.population = Files.load();
+
         this.fitness = new BasicFitness();
         initializeGame();
     }
@@ -69,6 +71,9 @@ public class Jota implements Renderer {
             this.manager.spawn(specie);
         }
         this.manager.moveDisabled();
+
+        Files.save(this.population);
+
     }
 
     public void learn() {

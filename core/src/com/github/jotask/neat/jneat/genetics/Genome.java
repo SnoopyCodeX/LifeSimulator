@@ -1,5 +1,7 @@
 package com.github.jotask.neat.jneat.genetics;
 
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonValue;
 import com.github.jotask.neat.jneat.network.Network;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.util.JRandom;
@@ -14,7 +16,7 @@ import static com.github.jotask.neat.jneat.util.Ref.*;
  * @author Jose Vives Iznardo
  * @since 10/03/2017
  */
-public class Genome {
+public class Genome implements Json.Serializable{
 
     private final ArrayList<Synapse> genes;
 
@@ -229,5 +231,24 @@ public class Genome {
     public List<Synapse> getGenes() { return genes; }
 
     public Network getNetwork() { return network; }
+
+    @Override
+    public void write(Json json) {
+        json.writeValue("fitness", this.fitness);
+        json.writeValue("maxNeuron", this.maxNeuron);
+        json.writeValue("globalRank", this.globalRank);
+        json.writeValue("genes", this.genes);
+    }
+
+    @Override
+    public void read(Json json, JsonValue data) {
+        this.fitness = data.getDouble("fitness");
+        this.globalRank = data.getInt("globalRank");
+        this.maxNeuron = data.getInt("maxNeuron");
+        for (JsonValue v : data.get("genes")) {
+            Synapse syn = json.readValue(Synapse.class, v);
+            this.genes.add(syn);
+        }
+    }
 
 }
