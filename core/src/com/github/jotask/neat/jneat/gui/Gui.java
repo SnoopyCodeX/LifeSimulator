@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.jneat.JNeat;
+import com.github.jotask.neat.jneat.Jota;
 
 /**
  * Gui
@@ -13,16 +13,16 @@ import com.github.jotask.neat.jneat.JNeat;
  * @author Jose Vives Iznardo
  * @since 03/03/2017
  */
-public class Gui implements Renderer{
+public class Gui implements Renderer {
 
-    final JNeat jNeat;
+    final Jota jNeat;
     final OrthographicCamera camera;
     final BitmapFont font;
 
     private final Information information;
     private final Fitness fitness;
 
-    public Gui(final JNeat jNeat) {
+    public Gui(final Jota jNeat) {
         this.jNeat = jNeat;
         final Neat neat = Neat.get();
         this.font = neat.getFont();

@@ -1,6 +1,8 @@
 package com.github.jotask.neat.jneat;
 
 import com.github.jotask.neat.Neat;
+import com.github.jotask.neat.jneat.genetics.Specie;
+import com.github.jotask.neat.jneat.util.Ref;
 
 import java.util.LinkedList;
 
@@ -10,16 +12,16 @@ import java.util.LinkedList;
  * @author Jose Vives Iznardo
  * @since 03/03/2017
  */
-public final class EnemyManager {
+public final class JotaManager {
 
     private LinkedList<NeatEnemy> active;
     private LinkedList<NeatEnemy> disabled;
 
-    public EnemyManager() {
+    public JotaManager() {
         this.active = new LinkedList<NeatEnemy>();
         this.disabled = new LinkedList<NeatEnemy>();
 
-        for(int i = 0; i < Constants.POPULATION; i++){
+        for(int i = 0; i < Ref.POPULATION; i++){
             final NeatEnemy e = Neat.get().getFactory().getNeatEnemy();
             e.disable();
             this.disabled.add(e);
@@ -35,12 +37,9 @@ public final class EnemyManager {
         this.active.clear();
     }
 
-    public LinkedList<NeatEnemy> getActive() { return active; }
-
-    public void spawn(final Species species, final Genome genome){
-
+    public void spawn(final Specie species){
         final NeatEnemy tmp = this.disabled.pollFirst();
-        tmp.activate(species, genome);
+        tmp.activate(species);
         this.active.add(tmp);
     }
 
@@ -51,4 +50,21 @@ public final class EnemyManager {
         }
     }
 
+    public LinkedList<NeatEnemy> getActive() { return active; }
+
+    public void moveDisabled() {
+        final int row = 3;
+        final float spaceX = 1f;
+        int c = 0;
+        int spaceY = 5;
+        for(final NeatEnemy e: this.disabled){
+            if(row <= c){
+                spaceY--;
+                c = 0;
+            }
+            float x = 15 + (spaceX * c++);
+            float y = spaceY;
+            e.getBody().setTransform(x, y, e.getBody().getAngle());
+        }
+    }
 }

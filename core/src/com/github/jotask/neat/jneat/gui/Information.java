@@ -6,7 +6,8 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.jneat.JNeat;
+import com.github.jotask.neat.jneat.Jota;
+import com.github.jotask.neat.jneat.util.Util;
 
 import java.util.LinkedList;
 
@@ -53,7 +54,7 @@ public class Information implements Renderer {
 
     private LinkedList<Inform> info;
 
-    public Information(final JNeat neat) {
+    public Information(final Jota neat) {
         this.info = new LinkedList<Inform>();
 
         OrthographicCamera c = Neat.get().getGui().getCamera();
@@ -68,17 +69,27 @@ public class Information implements Renderer {
 
         new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Generation") {
             @Override
-            void set() { this.t = neat.getPopulation().generation; }
+            void set() { this.t = neat.getPop().generation; }
         };
 
         new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Species") {
             @Override
-            void set() { this.t = neat.getPopulation().species.size(); }
+            void set() { this.t = neat.getPopulation(); }
+        };
+
+        new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Genomes") {
+            @Override
+            void set() { this.t = neat.getGenomes(); }
         };
 
         new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Active") {
             @Override
             void set() { this.t = neat.getManager().getActive().size(); }
+        };
+
+        new Inform<Double>(this.info, font, x, y - SPACE * i++, "MaxFitness" ) {
+            @Override
+            void set() { this.t = Util.limitDecimals(neat.getPop().maxFitness, 2); }
         };
 
     }

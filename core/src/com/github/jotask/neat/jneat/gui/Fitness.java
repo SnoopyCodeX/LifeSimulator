@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
-import com.github.jotask.neat.engine.Util;
+import com.github.jotask.neat.util.Util;
 
 import java.util.LinkedList;
 
@@ -15,7 +15,7 @@ import java.util.LinkedList;
  * @author Jose Vives Iznardo
  * @since 03/03/2017
  */
-public class Fitness implements Renderer{
+public class Fitness implements Renderer {
 
     private int SHOW = 100;
 
@@ -61,7 +61,7 @@ public class Fitness implements Renderer{
         }
 
         if(maxFitness < fitness){
-            maxFitness = fitness;
+            maxFitness = fitness + 10f;
         }
 
     }

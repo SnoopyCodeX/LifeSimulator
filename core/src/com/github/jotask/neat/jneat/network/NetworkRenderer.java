@@ -1,12 +1,16 @@
-package com.github.jotask.neat.jneat.gui;
+package com.github.jotask.neat.jneat.network;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.github.jotask.neat.Neat;
 import com.github.jotask.neat.jneat.*;
-import com.github.jotask.neat.jneat.neurons.Neuron;
+import com.github.jotask.neat.jneat.genetics.Synapse;
+import com.github.jotask.neat.jneat.gui.Renderer;
+import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.jneat.util.Util;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,24 +23,34 @@ import java.util.Map;
  */
 public class NetworkRenderer implements Renderer {
 
-    final JNeat neat;
+    final Jota neat;
+
     private final Rectangle rectangle;
 
-    final Color c = Color.CYAN;
+    public Network network;
 
-    private Network network;
+    final Color c = Color.WHITE;
 
     final Map<Integer, Cell> graph;
 
-    public NetworkRenderer(final JNeat neat, final OrthographicCamera cam) {
+    public NetworkRenderer(final Jota neat) {
         this.neat = neat;
+        final OrthographicCamera cam = Neat.get().getGui().getCamera();
         float w = cam.viewportWidth * .5f;
-        float h = Cell.size * Constants.INPUTS;
+        float h = Cell.SIZE * Ref.INPUTS;
 //        float x = cam.position.x - (w * .5f);
         float x = cam.position.x - 25;
         float y = cam.position.y - (h *.5f);
+
+//        w = cam.viewportWidth * .5f;
+//        h = cam.viewportHeight * .5f;
+//
+//        x = cam.position.x - ( w * .5f);
+//        y = cam.position.y  - (h * .5f);
+
         y -= 150f;
         x += 20f;
+
         this.rectangle = new Rectangle(x, y, w, h);
 
         graph = new HashMap<Integer, Cell>();
@@ -48,74 +62,85 @@ public class NetworkRenderer implements Renderer {
     public void createNetwork(NeatEnemy e) {
         this.graph.clear();
 
-        if(e.getGenome().getNetwork() == this.network){
+        if(e.getSpecies().genome.getNetwork() == this.network){
             return;
         }else{
-            this.network = e.getGenome().getNetwork();
+            this.network = e.getSpecies().genome.getNetwork();
         }
+
         // Create new network for render
-
-        final float minX = 30;
-        final float maxX = rectangle.getWidth() - 42;
-
-        float yOutStart = rectangle.y + (rectangle.height * .5f) - ((Cell.size * Constants.OUTPUTS) * .5f);
+        float yOutStart = rectangle.y + (rectangle.height * .5f) - ((Cell.SIZE * Ref.OUTPUTS) * .5f);
+        float yInpStart = rectangle.y + (rectangle.height * .5f) - ((Cell.SIZE * Ref.INPUTS) * .5f);
 
         int input = 0;
         int output = 0;
 
-        for (final Map.Entry<Integer, Neuron> entry : this.network.getNetwork().entrySet()) {
+        int hidden = 0;
+
+        float minX = rectangle.x + Cell.SIZE;
+        float maxX = rectangle.x + rectangle.width - Cell.SIZE;
+
+        for (final Map.Entry<Integer, Neuron> entry : this.network.network.entrySet()) {
             final int i = entry.getKey();
             final Neuron neuron = entry.getValue();
+
             final float x;
             final float y;
 
-            if (Neuron.isInput(i)) {
+            if (Util.isInput(i)) {
 
                 x = rectangle.x;
-                y = rectangle.y + Cell.size * input++;
+                y = yInpStart + Cell.SIZE * input++;
+
                 graph.put(i, new Cell(x, y, neuron));
 
-            } else if (Neuron.isOutput(i)) {
+            } else if (Util.isOutput(i)) {
 
-                x = rectangle.x + rectangle.width - Cell.size;
-                y = yOutStart + Cell.size * output++;
+                x = rectangle.x + rectangle.width - Cell.SIZE;
+                y = yOutStart + Cell.SIZE * output++;
+
                 graph.put(i, new Cell(x, y, neuron));
 
             } else {
 
-                x = rectangle.x + (rectangle.width * .5f);
+//                x = rectangle.x + (rectangle.width * .5f);
+                x = (minX + maxX) * .5f;
                 y = rectangle.y + (rectangle.height * .5f);
-                graph.put(i, new Cell(x, y, neuron, 1f));
-                throw new RuntimeException("created hidden");
+                graph.put(i, new Cell(x, y, neuron, 1f, Cell.SIZE * .5f));
+
+                hidden++;
 
             }
         }
 
-        // TODO Nodes from hidden layers
-//        for (int n = 0; n < 4; n++){
-//            for (final Synapse gene : e.getGenome().getGenes()){
-//                if (gene.isEnabled()) {
-//                    final Cell c1 = graph.get(gene.getInput());
-//                    final Cell c2 = graph.get(gene.getInput());
-//                    if (gene.getInput() >= Constants.INPUTS + Constants.OUTPUTS) {
-//                        c1.x = (int) (0.75 * c1.x + 0.25 * c2.x);
+
+//        final float a = .75f;
+//        final float b = .25f;
+//
+//        for (int n = 0; n < 4; ++n) {
+//            for (final Synapse gene : e.getGenome().genes) {
+//                if (gene.enabled) {
+//                    final Cell c1 = graph.get(gene.input);
+//                    final Cell c2 = graph.get(gene.output);
+//                    if (Util.isHidden(gene.input)) {
+//                        c1.x = (.75f * c1.x + .25f * c2.x);
 //                        if (c1.x >= c2.x)
-//                            c1.x = c1.x - 60;
+//                            c1.x = c1.x - Cell.SIZE;
 //                        if (c1.x < minX)
 //                            c1.x = minX;
 //                        if (c1.x > maxX)
 //                            c1.x = maxX;
-//                        c1.y = (int) (0.75 * c1.y + 0.25 * c2.y);
+//                        c1.y = (.75f * c1.y + .25f * c2.y);
 //                    }
-//                    if (gene.getOutput() >= Constants.INPUTS + Constants.OUTPUTS) {
-//                        c2.x = (int) (0.25 * c1.x + 0.75 * c2.x);
+//                    if (Util.isHidden(gene.output)) {
+//                        c2.x = (.25f * c1.x + .75f * c2.x);
 //                        if (c1.x >= c2.x)
-//                            c2.x = c2.x + 60;
+//                            c2.x = c2.x + Cell.SIZE;
 //                        if (c2.x < minX)
 //                            c2.x = minX;
 //                        if (c2.x > maxX)
 //                            c2.x = maxX;
-//                        c2.y = (int) (0.25 * c1.y + 0.75 * c2.y);
+//                        c2.y = (.25f * c1.y + .75f * c2.y);
 //                    }
 //                }
 //            }
@@ -139,10 +164,19 @@ public class NetworkRenderer implements Renderer {
             cell.debug(sr);
         }
 
+        if(this.neat.getBest() == null){
+            return;
+        }
+
         for (final Synapse gene : this.neat.getBest().getGenome().getGenes()) {
             if (gene.isEnabled()) {
                 final Cell c1 = graph.get(gene.getInput());
                 final Cell c2 = graph.get(gene.getOutput());
+
+                if(c1 == null || c2 == null){
+                    continue;
+                }
+
                 final Color color;
                 if (Neuron.sigmoid(gene.getWeight()) > 0.0) {
                     color = Color.GREEN;
@@ -150,38 +184,41 @@ public class NetworkRenderer implements Renderer {
                     color = Color.RED;
                 }
                 sr.setColor(color);
-                final float s = Cell.size * .5f;
-                sr.line(c1.x + s, c1.y + s, c2.x + s, c2.y + s);
+                final float s1 = c1.size * .5f;
+                final float s2 = c2.size * .5f;
+                sr.line(c1.x + s1, c1.y + s1, c2.x + s2, c2.y + s2);
             }
         }
     }
 
-    static class Cell implements Renderer{
+    static class Cell implements Renderer {
 
-        static float size = 32;
+        static float SIZE = 32;
         static float offset = 5f;
 
         private float x;
         private float y;
         private final Neuron neuron;
+        private final float size;
 
         private final Color bg;
 
         private final float alpha;
 
         public Cell(final float x, final float y, final Neuron neuron){
-            this(x, y, neuron, .5f);
+            this(x, y, neuron, .5f, Cell.SIZE);
         }
 
-        public Cell(final float x, final float y, final Neuron neuron, final float alpha) {
+        public Cell(final float x, final float y, final Neuron neuron, final float alpha, final float size) {
             this.x = x;
             this.y = y;
             this.neuron = neuron;
             this.alpha = alpha;
+            this.size = size;
 
-            if(Neuron.isInput(neuron.getId())) {
+            if(Util.isInput(this.neuron.getId())) {
                 bg = Color.LIME;
-            }else if(Neuron.isOutput(neuron.getId())){
+            }else if(Util.isOutput(this.neuron.getId())){
                 bg = Color.BROWN;
             }else{
                 bg = Color.BLACK;
@@ -203,14 +240,14 @@ public class NetworkRenderer implements Renderer {
 
             sr.set(ShapeRenderer.ShapeType.Filled);
             sr.setColor(bg);
-            sr.rect(x, y, 32, 32);
+            sr.rect(x, y, size, size);
 
             sr.setColor(color);
-            sr.rect(x + offset, y + offset, 32 - (offset * 2), 32 - (offset * 2));
+            sr.rect(x + offset, y + offset, (size - (offset * 2)), size - (offset * 2));
 
             sr.setColor(Color.BLACK);
             sr.set(ShapeRenderer.ShapeType.Line);
-            sr.rect(x, y, 32, 32);
+            sr.rect(x, y, size, size);
 
         }
     }
