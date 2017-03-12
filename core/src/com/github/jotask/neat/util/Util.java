@@ -1,4 +1,4 @@
-package com.github.jotask.neat.engine;
+package com.github.jotask.neat.util;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;

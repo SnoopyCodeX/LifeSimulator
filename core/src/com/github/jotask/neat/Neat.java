@@ -12,8 +12,7 @@ import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.github.jotask.neat.engine.*;
 import com.github.jotask.neat.engine.entity.Player;
-import com.github.jotask.neat.jneat.Constants;
-import com.github.jotask.neat.jneat.JNeat;
+import com.github.jotask.neat.jneat.Jota;
 
 import static com.badlogic.gdx.Gdx.gl;
 
@@ -40,7 +39,7 @@ public class Neat extends ApplicationAdapter {
 
 	Factory factory;
 
-	JNeat neat;
+	private Jota jota;
 
 	private Player player;
 	
@@ -48,92 +47,88 @@ public class Neat extends ApplicationAdapter {
 	public void create () {
 		Neat.instance = this;
 
-		font = new BitmapFont();
-		font.setColor(Color.BLACK);
+		this.font = new BitmapFont();
+		this.font.setColor(Color.BLACK);
 
-		gui = new Gui(this);
+		this.gui = new Gui(this);
 
-		sb = new SpriteBatch();
-		sr = new ShapeRenderer();
-		sr.setAutoShapeType(true);
+		this.sb = new SpriteBatch();
+		this.sr = new ShapeRenderer();
+		this.sr.setAutoShapeType(true);
 
-		camera = new Camera();
+		this.camera = new Camera();
 
-		entityManager = EntityManager.get();
+		this.entityManager = EntityManager.get();
 
-		world = new World(new Vector2(), true);
-		world.setContactListener(new WorldListener());
-		renderer = new Box2DDebugRenderer();
+		this.world = new World(new Vector2(), true);
+		this.world.setContactListener(new WorldListener());
+		this.renderer = new Box2DDebugRenderer();
 
-		factory = new Factory(this);
+		this.factory = new Factory(this);
 
-		factory.createWalls();
+		this.factory.createWalls();
 
-		player = factory.getPlayer();
+		this.player = factory.getPlayer();
 
-		neat = new JNeat(this);
+		this.jota = new Jota();
 
 	}
 
 	private void input(){ }
 
 	public void update(){
-		world.step(Gdx.graphics.getDeltaTime(), 6, 3);
-		player.update();
-		neat.evaluate();
-		entityManager.update();
-		neat.learn();
+		this.world.step(Gdx.graphics.getDeltaTime(), 6, 3);
+		this.player.update();
+		this.jota.eval();
+		this.entityManager.update();
+		this.jota.learn();
 	}
 
 	@Override
 	public void render () {
-		input();
-		update();
+		this.input();
+		this.update();
 		gl.glClearColor(b.r, b.g, b.b, b.a);
 
 		gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-		renderer.render(world, camera.combined);
+		this.renderer.render(world, camera.combined);
 
-		sb.setProjectionMatrix(camera.combined);
+		this.sb.setProjectionMatrix(camera.combined);
 
-		sb.begin();
-		entityManager.render(sb);
-		player.render(sb);
-		sb.end();
+		this.sb.begin();
+		this.entityManager.render(sb);
+		this.player.render(sb);
+		this.sb.end();
 
-		sr.setProjectionMatrix(camera.combined);
+		this.sr.setProjectionMatrix(camera.combined);
 
-		sr.begin();
-		sr.set(ShapeRenderer.ShapeType.Filled);
-		entityManager.debug(sr);
-		player.debug(sr);
-		sr.end();
+		this.sr.begin();
+		this.sr.set(ShapeRenderer.ShapeType.Filled);
+		this.entityManager.debug(sr);
+		this.player.debug(sr);
+		this.sr.end();
 
 
-		gl.glEnable(GL20.GL_BLEND);
 		gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
+		this.sb.setProjectionMatrix(this.getGui().getCamera().combined);
+		this.sr.setProjectionMatrix(this.getGui().getCamera().combined);
 
-		sb.setProjectionMatrix(this.getGui().getCamera().combined);
-		sr.setProjectionMatrix(this.getGui().getCamera().combined);
-
-		if(Constants.DRAW) {
-			neat.render(sb);
-			neat.debug(sr);
-			gui.render(sb);
-		}
+		this.jota.render(sb);
+		this.jota.debug(sr);
+		this.gui.render(sb);
 
 	}
 	
 	@Override
 	public void dispose () {
-		sb.dispose();
-		sr.dispose();
-		neat.dispose();
-		world.dispose();
+		this.sb.dispose();
+		this.sr.dispose();
+		this.jota.dispose();
+		this.world.dispose();
 		EntityManager.get().dispose();
-		font.dispose();
+		this.font.dispose();
 		Neat.instance = null;
 	}
 
@@ -142,10 +137,6 @@ public class Neat extends ApplicationAdapter {
 	public Factory getFactory() { return factory; }
 
 	public BitmapFont getFont() { return font; }
-
-	public JNeat getNeat() { return neat; }
-
-	public Camera getCamera() { return camera; }
 
 	public Player getPlayer() { return player; }
 
