@@ -15,9 +15,13 @@ public class Camera extends OrthographicCamera{
     public Viewport viewport;
 
     public Camera() {
-//        this.viewport = new FitViewport(21f, 11f, this);
-        this.viewport = new FitViewport(41f, 31f, this);
+//        this.viewport = new FitViewport(Constant.WORLD_WIDTH, Constant.WORLD_HEIGHT, this);
+        float w = 60f;
+        float h = 50f;
+        this.viewport = new FitViewport(w, h, this);
+        this.position.y = -8f;
         this.viewport.apply();
+        this.update();
     }
 
 }
