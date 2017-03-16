@@ -1,5 +1,12 @@
 package com.github.jotask.neat.jneat.util;
 
+import com.github.jotask.neat.util.JRandom;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+
 /**
  * Util
  * Util class for utils method for global uses
@@ -58,6 +65,48 @@ public final class Util {
         }
         double n = Math.round(number*d)/d;
         return n;
+    }
+
+    public static int indexByProbability(final Collection collection){
+
+        final ArrayList<Integer> numbers = new ArrayList<Integer>();
+        for(int i = 0; i < collection.size(); i++) {
+            numbers.add(i);
+        }
+
+        final ArrayList<Integer> other = new ArrayList<Integer>();
+        Collections.reverse(numbers);
+        for(int i = 0; i < numbers.size(); i++){
+            for(int j = 0; j < i + 1; j++){
+                other.add(numbers.get(i));
+            }
+        }
+
+        int r = JRandom.randomIndex(other);
+
+        return other.get(r);
+
+    }
+
+    public static void main(String[] args) {
+        final ArrayList<Integer> numbers = new ArrayList<Integer>();
+        for(int i = 0; i < 10; i++){
+            numbers.add(i);
+        }
+
+        final HashMap<Integer, Integer> probs = new HashMap<Integer, Integer>();
+        for(int i = 0; i < numbers.size(); i++){
+            probs.put(i, 0);
+        }
+
+        System.out.println(probs.toString());
+        for(int i = 0; i < 10000; i++){
+            int tmp = indexByProbability(numbers);
+            int v = probs.get(tmp) + 1;
+            probs.put(tmp, v);
+        }
+        System.out.println(probs.toString());
+
     }
 
 

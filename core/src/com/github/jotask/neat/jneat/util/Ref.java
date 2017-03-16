@@ -36,4 +36,7 @@ public class Ref {
 
     public static final float INIT_TIME = 1f;
 
+    // FIXME two inputs synapses are connected
+    // FIXME synapses disabled are innabled
+
 }

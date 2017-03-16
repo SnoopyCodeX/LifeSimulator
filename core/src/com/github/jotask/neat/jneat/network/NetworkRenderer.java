@@ -114,36 +114,32 @@ public class NetworkRenderer implements Renderer {
         }
 
 
-//        final float a = .75f;
-//        final float b = .25f;
-//
-//        for (int n = 0; n < 4; ++n) {
-//            for (final Synapse gene : e.getGenome().genes) {
-//                if (gene.enabled) {
-//                    final Cell c1 = graph.get(gene.input);
-//                    final Cell c2 = graph.get(gene.output);
-//                    if (Util.isHidden(gene.input)) {
-//                        c1.x = (.75f * c1.x + .25f * c2.x);
-//                        if (c1.x >= c2.x)
-//                            c1.x = c1.x - Cell.SIZE;
-//                        if (c1.x < minX)
-//                            c1.x = minX;
-//                        if (c1.x > maxX)
-//                            c1.x = maxX;
-//                        c1.y = (.75f * c1.y + .25f * c2.y);
-//                    }
-//                    if (Util.isHidden(gene.output)) {
-//                        c2.x = (.25f * c1.x + .75f * c2.x);
-//                        if (c1.x >= c2.x)
-//                            c2.x = c2.x + Cell.SIZE;
-//                        if (c2.x < minX)
-//                            c2.x = minX;
-//                        if (c2.x > maxX)
-//                            c2.x = maxX;
-//                        c2.y = (.25f * c1.y + .75f * c2.y);
-//                    }
-//                }
-//            }
+        final float a = .75f;
+        final float b = .25f;
+
+//        for (int n = 0; n < 4; n++) {
+            for (final Synapse gene : e.getGenome().getGenes()) {
+                if (gene.isEnabled()) {
+                    final Cell c1 = graph.get(gene.getInput());
+                    final Cell c2 = graph.get(gene.getOutput());
+                    if (Util.isHidden(gene.getInput())) {
+                        c1.x = (a * c1.x + b * c2.x);
+                        if (c1.x >= c2.x)
+                            c1.x = c1.x - Cell.SIZE;
+                        if (c1.x < minX) c1.x = minX;
+                        if (c1.x > maxX) c1.x = maxX;
+                        c1.y = (a * c1.y + b * c2.y);
+                    }
+                    if (Util.isHidden(gene.getOutput())) {
+                        c2.x = (b * c1.x + a * c2.x);
+                        if (c1.x >= c2.x)
+                            c2.x = c2.x + Cell.SIZE;
+                        if (c2.x < minX) c2.x = minX;
+                        if (c2.x > maxX) c2.x = maxX;
+                        c2.y = (b * c1.y + a * c2.y);
+                    }
+                }
+            }
 //        }
 
     }

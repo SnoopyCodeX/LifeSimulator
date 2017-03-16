@@ -128,6 +128,7 @@ public class Genome implements Json.Serializable{
 
         final Synapse gene = candidates.get(JRandom.random.nextInt(candidates.size()));
         gene.setEnabled(!gene.isEnabled());
+
     }
 
     public void mutateLink(final boolean forceBias) {
@@ -158,7 +159,11 @@ public class Genome implements Json.Serializable{
         final Synapse gene = genes.get(JRandom.random.nextInt(genes.size()));
         if (!gene.isEnabled())
             return;
+
         gene.setEnabled(false);
+
+        // TODO Remove gene
+        this.genes.remove(gene);
 
         ++maxNeuron;
 

@@ -3,6 +3,7 @@ package com.github.jotask.neat.jneat.genetics;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.jneat.util.Util;
 import com.github.jotask.neat.util.JRandom;
 
 import java.util.Collections;
@@ -174,10 +175,10 @@ public class Population implements Json.Serializable{
     }
 
     private Genome breedChildren(final Specie mother){
-        // TODO pick father with probability
         Specie father = mother;
-        while (mother == father){
-            father = this.species.get(JRandom.randomIndex(this.species));
+        while (mother == father) {
+            int index = Util.indexByProbability(this.species);
+            father = this.species.get(index);
         }
         return this.breedChild(mother.genome, father.genome);
     }
