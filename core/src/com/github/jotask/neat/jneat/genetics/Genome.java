@@ -6,7 +6,8 @@ import com.github.jotask.neat.jneat.network.Network;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.util.JRandom;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.github.jotask.neat.jneat.util.Ref.*;
 
@@ -23,9 +24,8 @@ public class Genome implements Json.Serializable{
     public double fitness;
     public int maxNeuron;
     public int globalRank;
-    public final double[] mutationRates = new double[] { CONN_MUTATION,
-            LINK_MUTATION, BIAS_MUTATION, NODE_MUTATION, ENABLE_MUTATION,
-            DISABLE_MUTATION, STEP_SIZE };
+
+    double step_size;
 
     private Network network;
 
@@ -34,19 +34,7 @@ public class Genome implements Json.Serializable{
         this.fitness = 0.0;
         this.maxNeuron = 0;
         this.globalRank = 0;
-    }
-
-    public Genome(final Genome genome){
-        this();
-        this.fitness = genome.fitness;
-        this.maxNeuron = genome.maxNeuron;
-        this.globalRank = genome.globalRank;
-        for(final Synapse synapse: genome.genes){
-            this.genes.add(new Synapse(synapse));
-        }
-        for(int i = 0; i < 7; i++){
-            this.mutationRates[i] = genome.mutationRates[i];
-        }
+        this.step_size = Ref.STEP_SIZE;
     }
 
     public boolean containsLink(final Synapse synapse){
@@ -73,48 +61,32 @@ public class Genome implements Json.Serializable{
 
     public void mutate() {
 
-        // FIXME sometimes it connects to two inputs
+        // FIXME sometimes it connects to two inputss
 
-        for (int i = 0; i < 7; i++)
-            mutationRates[i] *= JRandom.random.nextBoolean() ? 0.95 : 1.05263;
+//        if (JRandom.random() < CONN_MUTATION) {
+//            mutatePoint();
+//        }
 
-        if (JRandom.random.nextDouble() < mutationRates[0])
-            mutatePoint();
-
-        double prob = mutationRates[1];
-        while (prob > 0) {
-            if (JRandom.random.nextDouble() < prob)
-                mutateLink(false);
-            --prob;
+        if(JRandom.random() < LINK_MUTATION){
+            mutateLink(false);
         }
 
-        prob = mutationRates[2];
-        while (prob > 0) {
-            if (JRandom.random.nextDouble() < prob)
-                mutateLink(true);
-            --prob;
+        if(JRandom.random() < BIAS_MUTATION){
+            mutateLink(true);
         }
 
-        prob = mutationRates[3];
-        while (prob > 0) {
-            if (JRandom.random.nextDouble() < prob)
-                mutateNode();
-            --prob;
-        }
+//        if(JRandom.random() < NODE_MUTATION){
+//            mutateNode();
+//        }
 
-        prob = mutationRates[4];
-        while (prob > 0) {
-            if (JRandom.random.nextDouble() < prob)
-                mutateEnableDisable(true);
-            --prob;
-        }
+//        if (JRandom.random() < ENABLE_MUTATION) {
+//            mutateEnableDisable(true);
+//        }
+//
+//        if(JRandom.random() < DISABLE_MUTATION){
+//            mutateEnableDisable(false);
+//        }
 
-        prob = mutationRates[5];
-        while (prob > 0) {
-            if (JRandom.random.nextDouble() < prob)
-                mutateEnableDisable(false);
-            --prob;
-        }
     }
 
     public void mutateEnableDisable(final boolean enable) {
@@ -126,7 +98,7 @@ public class Genome implements Json.Serializable{
         if (candidates.isEmpty())
             return;
 
-        final Synapse gene = candidates.get(JRandom.random.nextInt(candidates.size()));
+        final Synapse gene = candidates.get(JRandom.randomIndex(candidates));
         gene.setEnabled(!gene.isEnabled());
 
     }
@@ -147,23 +119,22 @@ public class Genome implements Json.Serializable{
             return;
 
         newLink.setInnovation(++Population.innovation);
-        newLink.setWeight(JRandom.random.nextDouble() * 4.0 - 2.0);
+        newLink.setWeight(JRandom.random() * 4.0 - 2.0);
 
-        genes.add(newLink);
+        this.addLink(newLink);
+
     }
 
     public void mutateNode() {
         if (genes.isEmpty())
             return;
 
-        final Synapse gene = genes.get(JRandom.random.nextInt(genes.size()));
+        final Synapse gene = genes.get(JRandom.randomIndex(genes));
+
         if (!gene.isEnabled())
             return;
 
         gene.setEnabled(false);
-
-        // TODO Remove gene
-        this.genes.remove(gene);
 
         ++maxNeuron;
 
@@ -172,36 +143,46 @@ public class Genome implements Json.Serializable{
         gene1.setWeight(1.0);
         gene1.setInnovation(++Population.innovation);
         gene1.setEnabled(true);
-        genes.add(gene1);
+        this.addLink(gene1);
 
         final Synapse gene2 = new Synapse(gene);
         gene2.setInput(maxNeuron);
         gene2.setInnovation(++Population.innovation);
         gene2.setEnabled(true);
-        genes.add(gene2);
+        this.addLink(gene2);
     }
 
     public void mutatePoint() {
+
+        this.step_size *= JRandom.nextBoolean() ? 0.95: 1.05263;
+
         for (final Synapse gene : genes){
-            if (JRandom.random.nextDouble() < PERTURBATION) {
+            if (JRandom.random() < PERTURBATION) {
                 double w = gene.getWeight();
-                w += JRandom.random.nextDouble() * mutationRates[6] * 2.0 - mutationRates[6];
+                w += JRandom.random() * step_size * 2.0 - step_size;
                 gene.setWeight(w);
             }else{
-                gene.setWeight(JRandom.random.nextDouble() * 4.0 - 2.0);
+                gene.setWeight(JRandom.random() * 4.0 - 2.0);
             }
         }
     }
 
+    public boolean addLink(final Synapse link){
+        if(containsLink(link))
+            return false;
+        return this.genes.add(link);
+    }
+
     public int randomNeuron(final boolean nonInput, final boolean nonOutput) {
+
         final List<Integer> neurons = new ArrayList<Integer>();
 
         if (!nonInput)
-            for (int i = 0; i < INPUTS; ++i)
+            for (int i = 0; i < INPUTS - 1; i++)
                 neurons.add(i);
 
         if (!nonOutput)
-            for (int i = 0; i < OUTPUTS; ++i)
+            for (int i = 0; i < OUTPUTS; i++)
                 neurons.add(INPUTS + i);
 
         for (final Synapse gene : genes) {
@@ -211,7 +192,7 @@ public class Genome implements Json.Serializable{
                 neurons.add(gene.getOutput());
         }
 
-        return neurons.get(JRandom.random.nextInt(neurons.size()));
+        return neurons.get(JRandom.randomIndex(neurons));
     }
 
     public boolean sameSpecies(Genome genome) {
