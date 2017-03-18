@@ -1,5 +1,6 @@
 package com.github.jotask.neat.jneat;
 
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.Neat;
@@ -13,6 +14,8 @@ import com.github.jotask.neat.jneat.gui.Renderer;
 import com.github.jotask.neat.jneat.network.NetworkRenderer;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.util.Files;
+
+import static com.badlogic.gdx.Gdx.gl;
 
 /**
  * Jota
@@ -136,23 +139,18 @@ public class Jota implements Renderer {
 
     @Override
     public void debug(ShapeRenderer sr) {
+
+        gl.glEnable(GL20.GL_BLEND);
         sr.begin();
         this.gui.debug(sr);
         this.renderer.debug(sr);
         sr.end();
+        gl.glDisable(GL20.GL_BLEND);
     }
 
     public int getPopulation() { return this.population.getSpecies().size(); }
 
     public JotaManager getManager() { return manager; }
-
-    public int getGenomes(){
-        int count = 0;
-        for(Specie s: population.getSpecies()){
-            count++;
-        }
-        return count;
-    }
 
     public Population getPop(){
         return this.population;

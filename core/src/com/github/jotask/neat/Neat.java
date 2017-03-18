@@ -109,7 +109,6 @@ public class Neat extends ApplicationAdapter {
 		this.player.debug(sr);
 		this.sr.end();
 
-
 		gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
 
 		this.sb.setProjectionMatrix(this.getGui().getCamera().combined);
@@ -117,6 +116,7 @@ public class Neat extends ApplicationAdapter {
 
 		this.jota.render(sb);
 		this.jota.debug(sr);
+
 		this.gui.render(sb);
 
 	}
