@@ -22,19 +22,21 @@ public class Ref {
     public static final double DELTA_WEIGHTS   = 0.4;
     public static final double DELTA_THRESHOLD = 1.0;
 
-    public static final double CONN_MUTATION    = 0.25;
-    public static final double LINK_MUTATION    = 2.0;
-    public static final double BIAS_MUTATION    = 0.4;
-    public static final double NODE_MUTATION    = 0.5;
-    public static final double ENABLE_MUTATION  = 0.2;
-    public static final double DISABLE_MUTATION = 0.4;
-    public static final double STEP_SIZE        = 0.1;
-    public static final double PERTURBATION     = 0.9;
-    public static final double CROSSOVER        = 0.75;
+    public static final float CONN_MUTATION    = .25f;
+    public static final float LINK_MUTATION    = .0f;
+    public static final float BIAS_MUTATION    = .1f;
+    public static final float NODE_MUTATION    = .5f;
+    public static final float ENABLE_MUTATION  = .2f;
+    public static final float DISABLE_MUTATION = .4f;
+    public static final float STEP_SIZE        = .1f;
+    public static final float PERTURBATION     = .9f;
+    public static final float CROSSOVER        = .75f;
 
-    public static final double THRESHOLD = 0.5;
+    public static final float THRESHOLD = .5f;
 
     public static final float INIT_TIME = 1f;
+
+    public static final boolean LOAD = false;
 
     // FIXME two inputs synapses are connected
     // FIXME synapses disabled are innabled
