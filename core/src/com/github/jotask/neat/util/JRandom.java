@@ -15,7 +15,7 @@ public final class JRandom {
 
     private JRandom(){}
 
-    public static final Random random = new Random();
+    private static final Random random = new Random();
 
     public static float random(){ return random.nextFloat(); }
 
@@ -47,5 +47,7 @@ public final class JRandom {
     }
 
     public static int randomIndex(final Collection c){ return random.nextInt(c.size()); }
+
+    public static boolean nextBoolean(){ return random.nextBoolean(); }
 
 }

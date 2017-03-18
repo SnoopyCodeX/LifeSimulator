@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
 import com.github.jotask.neat.jneat.genetics.Population;
+import com.github.jotask.neat.jneat.util.Ref;
 
 /**
  * Files
@@ -27,6 +28,11 @@ public abstract class Files {
 
     public static Population load(){
         FileHandle fileHandle = Gdx.files.local(FILE + EXTENSION);
+
+        if(!Ref.LOAD){
+            fileHandle.delete();
+        }
+
         if(!fileHandle.exists()){
             System.out.println("does not exist");
             Population population = new Population();
