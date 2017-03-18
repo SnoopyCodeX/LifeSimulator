@@ -24,7 +24,7 @@ public class BasicFitness implements Fitness {
 
     @Override
     public double evaluate(NeatEnemy e) {
-        return ticks - e.getScore() * 1.5;
+        return ticks - (e.getScore() * 1.5);
     }
 
     @Override
