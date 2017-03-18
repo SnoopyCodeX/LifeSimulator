@@ -60,7 +60,7 @@ public class NeatEnemy extends Enemy{
     public float getScore() {
         final Vector2 e = this.getBody().getPosition();
         final Vector2 p = Neat.get().getPlayer().getBody().getPosition();
-        return e.dst2(p);
+        return e.dst(p);
     }
 
     public Specie getSpecies() { return specie; }
