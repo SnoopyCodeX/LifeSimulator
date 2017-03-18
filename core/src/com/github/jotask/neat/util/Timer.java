@@ -1,4 +1,4 @@
-package com.github.jotask.neat.engine;
+package com.github.jotask.neat.util;
 
 /**
  * Timer

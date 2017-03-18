@@ -19,7 +19,7 @@ public class Factory {
 
     private static Factory instance;
 
-    public static final Factory get(){
+    public static Factory get(){
         return instance;
     }
 

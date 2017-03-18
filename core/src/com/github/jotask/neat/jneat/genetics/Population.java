@@ -2,6 +2,7 @@ package com.github.jotask.neat.jneat.genetics;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import com.github.jotask.neat.jneat.util.Checker;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.jneat.util.Util;
 import com.github.jotask.neat.util.JRandom;
@@ -33,7 +34,6 @@ public class Population implements Json.Serializable{
     public void initialize(){
         for(int i = 0; i < Ref.POPULATION; i++){
             final Genome basic = new Genome();
-            basic.maxNeuron = (Ref.INPUTS + Ref.OUTPUTS) - 1;
             basic.mutate();
             addSpecies(basic);
         }
@@ -144,6 +144,7 @@ public class Population implements Json.Serializable{
     }
 
     public void newGeneration(){
+        System.out.println("------------ NEW POPULATION ------------");
         this.cullSpecies(false);
         this.rankGlobally();
         this.removeStaleSpecies();
@@ -172,6 +173,8 @@ public class Population implements Json.Serializable{
             this.addSpecies(child);
         }
         this.generation++;
+
+        System.out.println("------------ END POPULATION ------------");
     }
 
     private Genome breedChildren(final Specie mother){
@@ -197,31 +200,37 @@ public class Population implements Json.Serializable{
     }
 
     private Genome crossover(Genome mother, Genome father){
+
+        // FIXME crossover generate unvalid genomes
+
         if(father.fitness > mother.fitness){
             final Genome tmp = mother;
             mother = father;
             father = tmp;
         }
 
-        final Genome child = new Genome();
 
-        outerLoop: for(final Synapse gene1: mother.getGenes()){
-            for(final Synapse gene2: mother.getGenes()){
-                if(gene1.getInnovation() == gene2.getInnovation()){
-                    if(JRandom.nextBoolean() && gene2.isEnabled()){
-                        child.addLink(gene2);
-                        continue outerLoop;
-                    }else {
-                        break;
-                    }
-                }
-            }
-            child.addLink(gene1);
-        }
+        final Genome child = Checker.crossover(mother, father);
 
-        child.maxNeuron = Math.max(mother.maxNeuron, father.maxNeuron);
+//        outerLoop: for(final Synapse gene1: mother.getGenes()){
+//            for(final Synapse gene2: mother.getGenes()){
+//                if(gene1.getInnovation() == gene2.getInnovation()){
+//                    if(JRandom.nextBoolean() && gene2.isEnabled()){
+//                        child.addLink(gene2);
+//                        continue outerLoop;
+//                    }else {
+//                        break;
+//                    }
+//                }
+//            }
+//            child.addLink(gene1);
+//        }
 
-        child.step_size = mother.step_size;
+//        child.maxNeuron = Math.max(mother.maxNeuron, father.maxNeuron);
+//
+//        child.step_size = mother.step_size;
+
+//        Checker.crossover(mother, father, child);
 
         return child;
     }

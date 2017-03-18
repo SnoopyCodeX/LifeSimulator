@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.engine.Timer;
+import com.github.jotask.neat.util.Timer;
 import com.github.jotask.neat.jneat.fitness.BasicFitness;
 import com.github.jotask.neat.jneat.fitness.Fitness;
 import com.github.jotask.neat.jneat.genetics.Population;
@@ -139,7 +139,6 @@ public class Jota implements Renderer {
 
     @Override
     public void debug(ShapeRenderer sr) {
-
         gl.glEnable(GL20.GL_BLEND);
         sr.begin();
         this.gui.debug(sr);

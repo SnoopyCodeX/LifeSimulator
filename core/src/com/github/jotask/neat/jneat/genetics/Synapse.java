@@ -67,12 +67,15 @@ public class Synapse implements Json.Serializable{
         this.enabled = enabled;
     }
 
-    int getInnovation() {
-        return innovation;
-    }
+    public int getInnovation() { return innovation; }
 
     void setInnovation(int innovation) {
         this.innovation = innovation;
+    }
+
+    @Override
+    public String toString() {
+        return ("[" + input + " : " + output + "]");
     }
 
     @Override
