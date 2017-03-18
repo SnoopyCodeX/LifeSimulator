@@ -23,7 +23,7 @@ public class Ref {
     public static final double DELTA_THRESHOLD = 1.0;
 
     public static final float CONN_MUTATION    = .25f;
-    public static final float LINK_MUTATION    = .0f;
+    public static final float LINK_MUTATION    = .50f;
     public static final float BIAS_MUTATION    = .1f;
     public static final float NODE_MUTATION    = .5f;
     public static final float ENABLE_MUTATION  = .2f;
