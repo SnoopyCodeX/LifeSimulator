@@ -6,7 +6,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.jneat.*;
+import com.github.jotask.neat.jneat.Jota;
+import com.github.jotask.neat.jneat.NeatEnemy;
 import com.github.jotask.neat.jneat.genetics.Synapse;
 import com.github.jotask.neat.jneat.gui.Renderer;
 import com.github.jotask.neat.jneat.util.Ref;
@@ -69,13 +70,11 @@ public class NetworkRenderer implements Renderer {
         }
 
         // Create new network for render
-        float yOutStart = rectangle.y + (rectangle.height * .5f) - ((Cell.SIZE * Ref.OUTPUTS) * .5f);
-        float yInpStart = rectangle.y + (rectangle.height * .5f) - ((Cell.SIZE * Ref.INPUTS) * .5f);
+        float yInpStart = rectangle.y + (rectangle.height * .5f) + ((Cell.SIZE * Ref.INPUTS) * .5f) - Cell.SIZE;
+        float yOutStart = rectangle.y + (rectangle.height * .5f) + ((Cell.SIZE * Ref.OUTPUTS) * .5f) - Cell.SIZE;
 
         int input = 0;
         int output = 0;
-
-        int hidden = 0;
 
         float minX = rectangle.x + Cell.SIZE;
         float maxX = rectangle.x + rectangle.width - Cell.SIZE;
@@ -90,14 +89,14 @@ public class NetworkRenderer implements Renderer {
             if (Util.isInput(i)) {
 
                 x = rectangle.x;
-                y = yInpStart + Cell.SIZE * input++;
+                y = yInpStart - (Cell.SIZE * input++);
 
                 graph.put(i, new Cell(x, y, neuron));
 
             } else if (Util.isOutput(i)) {
 
                 x = rectangle.x + rectangle.width - Cell.SIZE;
-                y = yOutStart + Cell.SIZE * output++;
+                y = yOutStart - (Cell.SIZE * output++);
 
                 graph.put(i, new Cell(x, y, neuron));
 
@@ -108,8 +107,6 @@ public class NetworkRenderer implements Renderer {
                 y = rectangle.y + (rectangle.height * .5f);
                 graph.put(i, new Cell(x, y, neuron, 1f, Cell.SIZE * .5f));
 
-                hidden++;
-
             }
         }
 
@@ -117,7 +114,7 @@ public class NetworkRenderer implements Renderer {
         final float a = .75f;
         final float b = .25f;
 
-//        for (int n = 0; n < 4; n++) {
+        for (int n = 0; n < 4; n++) {
             for (final Synapse gene : e.getGenome().getGenes()) {
                 if (gene.isEnabled()) {
                     final Cell c1 = graph.get(gene.getInput());
@@ -140,7 +137,7 @@ public class NetworkRenderer implements Renderer {
                     }
                 }
             }
-//        }
+        }
 
     }
 
@@ -213,7 +210,11 @@ public class NetworkRenderer implements Renderer {
             this.size = size;
 
             if(Util.isInput(this.neuron.getId())) {
-                bg = Color.LIME;
+                if(this.neuron.getId() == Ref.Inputs.bias.ordinal()) {
+                    bg = Color.CLEAR;
+                }else {
+                    bg = Color.LIME;
+                }
             }else if(Util.isOutput(this.neuron.getId())){
                 bg = Color.BROWN;
             }else{
@@ -232,6 +233,7 @@ public class NetworkRenderer implements Renderer {
             } else {
                 color = Color.RED;
             }
+
             color.a = alpha;
 
             sr.set(ShapeRenderer.ShapeType.Filled);
