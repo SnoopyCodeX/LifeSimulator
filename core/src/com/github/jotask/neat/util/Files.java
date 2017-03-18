@@ -34,7 +34,6 @@ public abstract class Files {
         }
 
         if(!fileHandle.exists()){
-            System.out.println("does not exist");
             Population population = new Population();
             population.initialize();
             return population;
