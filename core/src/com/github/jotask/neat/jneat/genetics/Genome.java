@@ -173,7 +173,7 @@ public class Genome implements Json.Serializable{
         return this.genes.add(link);
     }
 
-    public int randomNeuron(final boolean nonInput, final boolean nonOutput) {
+    private int randomNeuron(final boolean nonInput, final boolean nonOutput) {
 
         final List<Integer> neurons = new ArrayList<Integer>();
 
@@ -193,6 +193,7 @@ public class Genome implements Json.Serializable{
         }
 
         return neurons.get(JRandom.randomIndex(neurons));
+
     }
 
     public boolean sameSpecies(Genome genome) {

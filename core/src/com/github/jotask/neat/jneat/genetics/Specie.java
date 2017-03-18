@@ -14,17 +14,13 @@ public class Specie implements Json.Serializable{
     public Genome genome;
     public double topFitness;
     public double averageFitness;
-    public int stanles;
-
-    Specie(){
-        this(null);
-    }
+    public int staleness;
 
     Specie(final Genome genome) {
         this.genome = genome;
         this.topFitness = 0.0;
         this.averageFitness = 0.0;
-        this.stanles = 0;
+        this.staleness = 0;
     }
 
     public void calculateAverageFitness() {
@@ -37,7 +33,7 @@ public class Specie implements Json.Serializable{
     public void write(Json json) {
         json.writeValue("topFitness", this.topFitness);
         json.writeValue("averageFitness", this.averageFitness);
-        json.writeValue("stanles", this.stanles);
+        json.writeValue("staleness", this.staleness);
         json.writeValue("genome", this.genome);
     }
 
@@ -45,7 +41,7 @@ public class Specie implements Json.Serializable{
     public void read(Json json, JsonValue data) {
         this.topFitness = data.getDouble("topFitness");
         this.averageFitness = data.getDouble("averageFitness");
-        this.stanles = data.getInt("stanles");
+        this.staleness = data.getInt("staleness");
         this.genome = json.readValue(Genome.class, data.get("genome"));
     }
 }
