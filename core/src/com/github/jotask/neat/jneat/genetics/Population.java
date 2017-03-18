@@ -190,7 +190,9 @@ public class Population implements Json.Serializable{
         }else{
             child = mother;
         }
-        child.mutate();
+        if(JRandom.random() < Ref.MUTATION) {
+            child.mutate();
+        }
         return child;
     }
 

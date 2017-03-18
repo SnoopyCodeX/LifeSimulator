@@ -22,6 +22,8 @@ public class Ref {
     public static final double DELTA_WEIGHTS   = 0.4;
     public static final double DELTA_THRESHOLD = 1.0;
 
+    public static final float MUTATION = .75f;
+
     public static final float CONN_MUTATION    = .25f;
     public static final float LINK_MUTATION    = .50f;
     public static final float BIAS_MUTATION    = .1f;
