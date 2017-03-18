@@ -10,6 +10,8 @@ import com.github.jotask.neat.jneat.NeatEnemy;
  */
 public interface Fitness {
 
+    void update();
+
     double evaluate(final NeatEnemy e);
 
     void reset();
