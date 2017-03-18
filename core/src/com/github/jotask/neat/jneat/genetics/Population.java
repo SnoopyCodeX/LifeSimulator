@@ -108,12 +108,12 @@ public class Population implements Json.Serializable{
         for(final Specie specie: this.species){
             if(specie.genome.fitness > specie.topFitness){
                 specie.topFitness = specie.genome.fitness;
-                specie.stanles = 0;
+                specie.staleness = 0;
             }else{
-                specie.stanles++;
+                specie.staleness++;
             }
 
-            if(specie.stanles < Ref.STALE_SPECIES || specie.topFitness >= maxFitness){
+            if(specie.staleness < Ref.STALE_SPECIES || specie.topFitness >= maxFitness){
                 survived.add(specie);
             }
 
@@ -185,7 +185,7 @@ public class Population implements Json.Serializable{
 
     private Genome breedChild(final Genome mother, final Genome father){
         final Genome child;
-        if(JRandom.random.nextDouble() < Ref.CROSSOVER){
+        if(JRandom.random() < Ref.CROSSOVER){
             child = this.crossover(mother, father);
         }else{
             child = mother;
@@ -206,22 +206,20 @@ public class Population implements Json.Serializable{
         outerLoop: for(final Synapse gene1: mother.getGenes()){
             for(final Synapse gene2: mother.getGenes()){
                 if(gene1.getInnovation() == gene2.getInnovation()){
-                    if(JRandom.random.nextBoolean() && gene2.isEnabled()){
-                        child.getGenes().add(new Synapse(gene2));
+                    if(JRandom.nextBoolean() && gene2.isEnabled()){
+                        child.addLink(gene2);
                         continue outerLoop;
                     }else {
                         break;
                     }
                 }
             }
-            child.getGenes().add(new Synapse(gene1));
+            child.addLink(gene1);
         }
 
         child.maxNeuron = Math.max(mother.maxNeuron, father.maxNeuron);
 
-        for(int i = 0; i < 7; i++){
-            child.mutationRates[i] = mother.mutationRates[i];
-        }
+        child.step_size = mother.step_size;
 
         return child;
     }
