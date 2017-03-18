@@ -78,6 +78,8 @@ public class Jota implements Renderer {
 
     public void learn() {
 
+        this.fitness.update();
+
         NeatEnemy b = this.manager.getActive().getFirst();
 
         for (final NeatEnemy e : this.manager.getActive()) {
