@@ -1,7 +1,7 @@
 package com.github.jotask.neat.jneat;
 
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.jneat.genetics.Specie;
+import com.github.jotask.neat.jneat.genetics.Genome;
 import com.github.jotask.neat.jneat.util.Ref;
 
 import java.util.LinkedList;
@@ -37,9 +37,9 @@ public final class JotaManager {
         this.active.clear();
     }
 
-    public void spawn(final Specie species){
+    public void spawn(final Genome genome){
         final NeatEnemy tmp = this.disabled.pollFirst();
-        tmp.activate(species);
+        tmp.activate(genome);
         this.active.add(tmp);
     }
 

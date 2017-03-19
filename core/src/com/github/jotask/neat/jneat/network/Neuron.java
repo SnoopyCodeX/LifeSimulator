@@ -12,7 +12,7 @@ import java.util.LinkedList;
  */
 class Neuron {
 
-    protected static double sigmoid(final double x) {
+    static double sigmoid(final double x) {
         return 2.0 / (1.0 + Math.exp(-4.9 * x)) - 1.0;
     }
 

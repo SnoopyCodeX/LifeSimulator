@@ -18,7 +18,7 @@ public class Network {
 
     public Map<Integer, Neuron> network = null;
 
-    public Network(final ArrayList<Synapse> genes) {
+    public Network(final LinkedList<Synapse> genes) {
 
         this.network = new HashMap<Integer, Neuron>();
         for(int i = 0; i < Ref.INPUTS; i++){

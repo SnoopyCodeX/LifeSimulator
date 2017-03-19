@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.Neat;
+import com.github.jotask.neat.jneat.genetics.Genome;
 import com.github.jotask.neat.util.Timer;
 import com.github.jotask.neat.jneat.fitness.BasicFitness;
 import com.github.jotask.neat.jneat.fitness.Fitness;
@@ -24,8 +25,6 @@ import static com.badlogic.gdx.Gdx.gl;
  * @since 10/03/2017
  */
 public class Jota implements Renderer {
-
-    private int ticks;
 
     private final JotaManager manager;
 
@@ -66,16 +65,18 @@ public class Jota implements Renderer {
     }
 
     public void initializeGame() {
-        ticks = 0;
         best = null;
         this.manager.clear();
         for (final Specie specie : this.population.getSpecies()) {
-            specie.genome.generateNetwork();
-            this.manager.spawn(specie);
+            for(final Genome genome: specie.getGenomes()) {
+                genome.generateNetwork();
+                this.manager.spawn(genome);
+            }
         }
         this.manager.moveDisabled();
 
-        Files.save(this.population);
+        if(Ref.SAVE)
+            Files.save(this.population);
 
     }
 

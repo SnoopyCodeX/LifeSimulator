@@ -28,7 +28,7 @@ public class NetworkRenderer implements Renderer {
 
     private final Rectangle rectangle;
 
-    public Network network;
+    private Network network;
 
     final Color c = Color.WHITE;
 
@@ -63,10 +63,10 @@ public class NetworkRenderer implements Renderer {
     public void createNetwork(NeatEnemy e) {
         this.graph.clear();
 
-        if(e.getSpecies().genome.getNetwork() == this.network){
+        if(e.getGenome().getNetwork() == this.network){
             return;
         }else{
-            this.network = e.getSpecies().genome.getNetwork();
+            this.network = e.getGenome().getNetwork();
         }
 
         // Create new network for render
@@ -181,72 +181,6 @@ public class NetworkRenderer implements Renderer {
                 final float s2 = c2.size * .5f;
                 sr.line(c1.x + s1, c1.y + s1, c2.x + s2, c2.y + s2);
             }
-        }
-    }
-
-    static class Cell implements Renderer {
-
-        static float SIZE = 32;
-        static float offset = 5f;
-
-        private float x;
-        private float y;
-        private final Neuron neuron;
-        private final float size;
-
-        private final Color bg;
-
-        private final float alpha;
-
-        public Cell(final float x, final float y, final Neuron neuron){
-            this(x, y, neuron, .5f, Cell.SIZE);
-        }
-
-        public Cell(final float x, final float y, final Neuron neuron, final float alpha, final float size) {
-            this.x = x;
-            this.y = y;
-            this.neuron = neuron;
-            this.alpha = alpha;
-            this.size = size;
-
-            if(Util.isInput(this.neuron.getId())) {
-                if(this.neuron.getId() == Ref.Inputs.bias.ordinal()) {
-                    bg = Color.CLEAR;
-                }else {
-                    bg = Color.LIME;
-                }
-            }else if(Util.isOutput(this.neuron.getId())){
-                bg = Color.BROWN;
-            }else{
-                bg = Color.BLACK;
-            }
-        }
-
-        @Override
-        public void render(SpriteBatch sb) { }
-
-        @Override
-        public void debug(final ShapeRenderer sr) {
-            Color color;
-            if (this.neuron.getValue() > 0.0) {
-                color = Color.GREEN;
-            } else {
-                color = Color.RED;
-            }
-
-            color.a = alpha;
-
-            sr.set(ShapeRenderer.ShapeType.Filled);
-            sr.setColor(bg);
-            sr.rect(x, y, size, size);
-
-            sr.setColor(color);
-            sr.rect(x + offset, y + offset, (size - (offset * 2)), size - (offset * 2));
-
-            sr.setColor(Color.BLACK);
-            sr.set(ShapeRenderer.ShapeType.Line);
-            sr.rect(x, y, size, size);
-
         }
     }
 
