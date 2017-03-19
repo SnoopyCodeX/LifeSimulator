@@ -7,6 +7,7 @@ import com.github.jotask.neat.util.JRandom;
 import java.util.LinkedList;
 
 import static com.github.jotask.neat.jneat.util.Ref.CROSSOVER;
+import static com.github.jotask.neat.jneat.util.Ref.MUTATION;
 
 /**
  * Specie
@@ -17,72 +18,76 @@ import static com.github.jotask.neat.jneat.util.Ref.CROSSOVER;
 public class Specie implements Json.Serializable{
 
     private final LinkedList<Genome> genomes;
-    public double topFitness;
-    public double averageFitness;
-    public int staleness;
+    double topFitness;
+    double averageFitness;
+    int staleness;
 
-    public Specie() {
+    Specie() {
         this.genomes = new LinkedList<Genome>();
         this.topFitness = 0.0;
         this.averageFitness = 0.0;
         this.staleness = 0;
     }
 
-    public Genome breedChild() {
+    Genome breedChild() {
         final Genome child;
         if (JRandom.random() < CROSSOVER) {
             final Genome g1 = genomes.get(JRandom.randomIndex(genomes));
             final Genome g2 = genomes.get(JRandom.randomIndex(genomes));
             child = crossover(g1, g2);
         } else {
-            final Genome gen = genomes.get(JRandom.randomIndex(genomes));
-            child = new Genome(gen);
+            final Genome genome = genomes.get(JRandom.randomIndex(genomes));
+            child = new Genome(genome);
         }
-        child.mutate();
+        if(JRandom.random() < MUTATION) {
+            child.mutate();
+        }
         return child;
     }
 
-    public void calculateAverageFitness() {
+    void calculateAverageFitness() {
         double total = 0.0;
-        for (final Genome genome : genomes)
+        for (final Genome genome : genomes) {
             total += genome.globalRank;
+        }
         averageFitness = total / genomes.size();
     }
 
-    private Genome crossover(Genome g1, Genome g2) {
-        if (g2.fitness > g1.fitness) {
-            final Genome tmp = g1;
-            g1 = g2;
-            g2 = tmp;
+    private Genome crossover(Genome mother, Genome father) {
+        if (father.fitness > mother.fitness) {
+            final Genome tmp = mother;
+            mother = father;
+            father = tmp;
         }
 
         final Genome child = new Genome();
-        outerloop: for (final Synapse gene1 : g1.getGenes()) {
-            for (final Synapse gene2 : g2.getGenes())
-                if (gene1.getInnovation() == gene2.getInnovation())
+        outerLoop: for (final Synapse gene1 : mother.getGenes()) {
+            for (final Synapse gene2 : father.getGenes()) {
+                if (gene1.getInnovation() == gene2.getInnovation()) {
                     if (JRandom.nextBoolean() && gene2.isEnabled()) {
                         child.getGenes().add(new Synapse(gene2));
-                        continue outerloop;
-                    } else
+                        continue outerLoop;
+                    } else {
                         break;
+                    }
+                }
+            }
             child.getGenes().add(new Synapse(gene1));
         }
 
-        child.maxNeuron = Math.max(g1.maxNeuron, g2.maxNeuron);
+        child.maxNeuron = Math.max(mother.maxNeuron, father.maxNeuron);
 
-        child.step_size = g1.step_size;
+        child.step_size = mother.step_size;
 
         return child;
     }
-
-    public LinkedList<Genome> getGenomes() { return genomes; }
 
     @Override
     public void write(Json json) {
         json.writeValue("topFitness", this.topFitness);
         json.writeValue("averageFitness", this.averageFitness);
         json.writeValue("staleness", this.staleness);
-//        json.writeValue("genome", this.genome);
+        json.writeValue("genomes", this.genomes);
     }
 
     @Override
@@ -90,6 +95,12 @@ public class Specie implements Json.Serializable{
         this.topFitness = data.getDouble("topFitness");
         this.averageFitness = data.getDouble("averageFitness");
         this.staleness = data.getInt("staleness");
-//        this.genome = json.readValue(Genome.class, data.get("genome"));
+        for (JsonValue v : data.get("genomes")) {
+            Genome g = json.readValue(Genome.class, v);
+            this.genomes.add(g);
+        }
     }
+
+    public LinkedList<Genome> getGenomes() { return genomes; }
+
 }

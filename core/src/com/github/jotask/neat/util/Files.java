@@ -21,9 +21,16 @@ public abstract class Files {
 
     public static void save(final Population population){
         final Json json = new Json();
-        final FileHandle fileHandle = Gdx.files.local(FILE + EXTENSION);
         final String text = json.prettyPrint(population);
+
+        final FileHandle fileHandle = Gdx.files.local(FILE + EXTENSION);
         fileHandle.writeString(text, false);
+
+        final FileHandle test1 = Gdx.files.local(FILE + "_strings" + EXTENSION);
+        test1.writeString(text, false);
+
+        final FileHandle test2 = Gdx.files.local(FILE + "_bytes" + EXTENSION);
+        test2.writeBytes(text.getBytes(), false);
     }
 
     public static Population load(){

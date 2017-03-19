@@ -69,7 +69,7 @@ public class Information implements Renderer {
 
         new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Generation") {
             @Override
-            void set() { this.t = neat.getPop().generation; }
+            void set() { this.t = neat.getPop().getGeneration(); }
         };
 
         new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Species") {

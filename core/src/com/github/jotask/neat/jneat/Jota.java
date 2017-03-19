@@ -107,7 +107,7 @@ public class Jota implements Renderer {
         }
 
         if (timer.isPassed()) {
-            this.gui.getFitness().addFitness(this.population.generation, this.best.getGenome().fitness);
+            this.gui.getFitness().addFitness(this.population.getGeneration(), this.best.getGenome().fitness);
             this.manager.clear();
             this.fitness.reset();
             this.population.newGeneration();
