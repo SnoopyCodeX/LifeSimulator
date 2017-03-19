@@ -2,14 +2,12 @@ package com.github.jotask.neat.jneat.genetics;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import com.github.jotask.neat.jneat.util.Checker;
 import com.github.jotask.neat.jneat.util.Ref;
-import com.github.jotask.neat.jneat.util.Util;
 import com.github.jotask.neat.util.JRandom;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
+import java.util.*;
+
+import static com.github.jotask.neat.jneat.util.Ref.STALE_SPECIES;
 
 /**
  * Population
@@ -19,9 +17,9 @@ import java.util.LinkedList;
  */
 public class Population implements Json.Serializable{
 
-    public static int innovation;
+    public static int innovation = Ref.INPUTS + Ref.OUTPUTS - 1;
 
-    private final LinkedList<Specie> species;
+    public final LinkedList<Specie> species;
     public int generation;
     public double maxFitness;
 
@@ -31,52 +29,118 @@ public class Population implements Json.Serializable{
         this.maxFitness = 0.0;
     }
 
-    public void initialize(){
-        for(int i = 0; i < Ref.POPULATION; i++){
-            final Genome basic = new Genome();
-            basic.mutate();
-            addSpecies(basic);
+    private void addToSpecies(final Genome child) {
+        for (final Specie species : this.species)
+            if (child.sameSpecies(species.getGenomes().get(0))) {
+                species.getGenomes().add(child);
+                return;
+            }
+
+        final Specie childSpecies = new Specie();
+        childSpecies.getGenomes().add(child);
+        species.add(childSpecies);
+    }
+
+    private void cullSpecies(final boolean cutToOne) {
+        for (final Specie species : this.species) {
+            Collections.sort(species.getGenomes(), new Comparator<Genome>() {
+
+                @Override
+                public int compare(final Genome o1, final Genome o2) {
+                    final double cmp = o2.fitness - o1.fitness;
+                    return cmp == 0.0 ? 0 : cmp > 0.0 ? 1 : -1;
+                }
+            });
+
+            double remaining = Math.ceil(species.getGenomes().size() / 2.0);
+            if (cutToOne)
+                remaining = 1.0;
+
+            while (species.getGenomes().size() > remaining)
+                species.getGenomes().remove(species.getGenomes().size() - 1);
         }
     }
 
-    private void addSpecies(final Genome child){
-        final Specie childSpecie = new Specie(child);
-        species.add(childSpecie);
+    public void initialize() {
+        for (int i = 0; i < Ref.POPULATION; ++i) {
+            final Genome basic = new Genome();
+            basic.mutate();
+            addToSpecies(basic);
+        }
     }
 
-    private void cullSpecies(final boolean cutToOne){
+    public void newGeneration() {
 
-        final LinkedList<Specie> survived = new LinkedList<Specie>(this.species);
+        // kill overpopulation
+        cullSpecies(false);
 
-        Collections.sort(survived, new Comparator<Specie>() {
+        rankGlobally();
+
+        // kill contaminated species
+        removeStaleSpecies();
+        rankGlobally();
+        for (final Specie species : this.species)
+            species.calculateAverageFitness();
+        removeWeakSpecies();
+        final double sum = totalAverageFitness();
+        final List<Genome> children = new ArrayList<Genome>();
+        for (final Specie species : this.species) {
+            final double breed = Math.floor(species.averageFitness / sum * Ref.POPULATION) - 1.0;
+            for (int i = 0; i < breed; ++i)
+                children.add(species.breedChild());
+        }
+        cullSpecies(true);
+        while (children.size() + species.size() < Ref.POPULATION) {
+            final Specie species = this.species.get(JRandom.randomIndex(this.species));
+            children.add(species.breedChild());
+        }
+        for (final Genome child : children)
+            addToSpecies(child);
+
+        while(this.species.size() < Ref.POPULATION * .5f)
+            diversity();
+
+        generation++;
+    }
+
+    private void diversity(){
+
+        final LinkedList<Specie> other = new LinkedList<Specie>(this.species);
+        Collections.sort(other, new Comparator<Specie>() {
             @Override
-            public int compare(final Specie o1, final Specie o2) {
-                final double cmp = o2.genome.fitness - o1.genome.fitness;
-                return cmp == 0.0 ? 0 : cmp > 0.0 ? 1 : -1;
+            public int compare(Specie o1, Specie o2) {
+                int tmp = o1.getGenomes().size() - o2.getGenomes().size();
+                return tmp == 0 ? 0: tmp > 0 ? -1 : 1;
             }
         });
 
-        double remaining = Math.ceil(survived.size() / 2.0);
+        final Specie mother = other.getFirst();
 
-        if (cutToOne) {
-            remaining = 1.0;
+        final Specie a = new Specie();
+        final Specie b = new Specie();
+
+        boolean tmp = false;
+        for(final Genome g: mother.getGenomes()){
+            if(tmp){
+                a.getGenomes().add(g);
+            }else{
+                b.getGenomes().add(g);
+            }
+            tmp = !tmp;
         }
 
-        while (survived.size() > remaining) {
-            survived.removeLast();
-        }
+        this.species.remove(mother);
 
-        this.species.clear();
-        this.species.addAll(survived);
-
+        this.species.add(a);
+        this.species.add(b);
 
     }
 
-    private void rankGlobally(){
-        final LinkedList<Genome> global = new LinkedList<Genome>();
-        for (final Specie specie : this.species) {
-            global.add(specie.genome);
-        }
+    private void rankGlobally() {
+        final List<Genome> global = new ArrayList<Genome>();
+        for (final Specie species : this.species)
+            for (final Genome genome : species.getGenomes())
+                global.add(genome);
 
         Collections.sort(global, new Comparator<Genome>() {
 
@@ -87,155 +151,60 @@ public class Population implements Json.Serializable{
             }
         });
 
-        for (int i = 0; i < global.size(); i++) {
+        for (int i = 0; i < global.size(); ++i)
             global.get(i).globalRank = i;
-        }
-
     }
 
-    public void removeStaleSpecies(){
-        final LinkedList<Specie> survived = new LinkedList<Specie>();
+    private void removeStaleSpecies() {
+        final List<Specie> survived = new ArrayList<Specie>();
+        for (final Specie species : this.species) {
+            Collections.sort(species.getGenomes(), new Comparator<Genome>() {
 
-        Collections.sort(this.species, new Comparator<Specie>() {
+                @Override
+                public int compare(final Genome o1, final Genome o2) {
+                    final double cmp = o2.fitness - o1.fitness;
+                    return cmp == 0 ? 0 : cmp > 0 ? 1 : -1;
+                }
+            });
 
-            @Override
-            public int compare(final Specie o1, final Specie o2) {
-                final double cmp = o2.genome.fitness - o1.genome.fitness;
-                return cmp == 0 ? 0 : cmp > 0 ? 1 : -1;
-            }
-        });
+            if (species.getGenomes().get(0).fitness > species.topFitness) {
+                species.topFitness = species.getGenomes().get(0).fitness;
+                species.staleness = 0;
+            } else
+                ++species.staleness;
 
-        for(final Specie specie: this.species){
-            if(specie.genome.fitness > specie.topFitness){
-                specie.topFitness = specie.genome.fitness;
-                specie.staleness = 0;
-            }else{
-                specie.staleness++;
-            }
-
-            if(specie.staleness < Ref.STALE_SPECIES || specie.topFitness >= maxFitness){
-                survived.add(specie);
-            }
-
+            if (species.staleness < STALE_SPECIES
+                    || species.topFitness >= maxFitness)
+                survived.add(species);
         }
-        this.species.clear();
-        this.species.addAll(survived);
+
+        species.clear();
+        species.addAll(survived);
     }
 
-    private void removeWeakSpecies(){
-        final LinkedList<Specie> survived = new LinkedList<Specie>();
+    private void removeWeakSpecies() {
+        final List<Specie> survived = new ArrayList<Specie>();
+
         final double sum = totalAverageFitness();
-        for(final Specie specie: this.species){
-            final double breed = Math.floor(specie.averageFitness / sum * Ref.POPULATION);
-            if(breed >= 1.0){
-                survived.add(specie);
-            }
+        for (final Specie species : this.species) {
+            final double breed = Math
+                    .floor(species.averageFitness / sum * Ref.POPULATION);
+            if (breed >= 1.0)
+                survived.add(species);
         }
-        this.species.clear();
-        this.species.addAll(survived);
+
+        species.clear();
+        species.addAll(survived);
     }
 
     private double totalAverageFitness() {
         double total = 0;
-        for (final Specie species : this.species) {
+        for (final Specie species : this.species)
             total += species.averageFitness;
-        }
         return total;
     }
 
-    public void newGeneration(){
-        System.out.println("------------ NEW POPULATION ------------");
-        this.cullSpecies(false);
-        this.rankGlobally();
-        this.removeStaleSpecies();
-        this.rankGlobally();
-        for(final Specie specie: this.species){
-            specie.calculateAverageFitness();
-        }
-        this.removeWeakSpecies();
-        final double sum = totalAverageFitness();
-        final LinkedList<Genome> childrens = new LinkedList<Genome>();
-        for(final Specie specie: this.species){
-            final double breed = Math.floor(specie.averageFitness / sum * Ref.POPULATION) - 1.0;
-            for(int i = 0; i < breed; i++){
-                final Genome genome = this.breedChildren(specie);
-                childrens.add(genome);
-            }
-        }
-        this.cullSpecies(true);
-        while(childrens.size() + this.species.size() > Ref.POPULATION){
-            final Specie specie = this.species.get(JRandom.randomIndex(this.species));
-            final Genome genome = this.breedChildren(specie);
-            childrens.add(genome);
-        }
-
-        for(final Genome child: childrens){
-            this.addSpecies(child);
-        }
-        this.generation++;
-
-        System.out.println("------------ END POPULATION ------------");
-    }
-
-    private Genome breedChildren(final Specie mother){
-        Specie father = mother;
-        while (mother == father) {
-            int index = Util.indexByProbability(this.species);
-            father = this.species.get(index);
-        }
-        return this.breedChild(mother.genome, father.genome);
-    }
-
-    private Genome breedChild(final Genome mother, final Genome father){
-        final Genome child;
-        if(JRandom.random() < Ref.CROSSOVER){
-            child = this.crossover(mother, father);
-        }else{
-            child = mother;
-        }
-        if(JRandom.random() < Ref.MUTATION) {
-            child.mutate();
-        }
-        return child;
-    }
-
-    private Genome crossover(Genome mother, Genome father){
-
-        // FIXME crossover generate unvalid genomes
-
-        if(father.fitness > mother.fitness){
-            final Genome tmp = mother;
-            mother = father;
-            father = tmp;
-        }
-
-
-        final Genome child = Checker.crossover(mother, father);
-
-//        outerLoop: for(final Synapse gene1: mother.getGenes()){
-//            for(final Synapse gene2: mother.getGenes()){
-//                if(gene1.getInnovation() == gene2.getInnovation()){
-//                    if(JRandom.nextBoolean() && gene2.isEnabled()){
-//                        child.addLink(gene2);
-//                        continue outerLoop;
-//                    }else {
-//                        break;
-//                    }
-//                }
-//            }
-//            child.addLink(gene1);
-//        }
-
-//        child.maxNeuron = Math.max(mother.maxNeuron, father.maxNeuron);
-//
-//        child.step_size = mother.step_size;
-
-//        Checker.crossover(mother, father, child);
-
-        return child;
-    }
-
-    public LinkedList<Specie> getSpecies() { return species; }
+    public List<Specie> getSpecies() { return species; }
 
     @Override
     public void write(Json json) {

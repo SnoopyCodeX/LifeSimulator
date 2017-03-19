@@ -74,11 +74,6 @@ public class Synapse implements Json.Serializable{
     }
 
     @Override
-    public String toString() {
-        return ("[" + input + " : " + output + "]");
-    }
-
-    @Override
     public void write(Json json) {
         json.writeValue("input", this.input);
         json.writeValue("output", this.output);

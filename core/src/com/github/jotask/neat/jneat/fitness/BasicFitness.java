@@ -1,5 +1,6 @@
 package com.github.jotask.neat.jneat.fitness;
 
+import com.badlogic.gdx.math.Vector2;
 import com.github.jotask.neat.jneat.NeatEnemy;
 
 /**
@@ -14,6 +15,8 @@ import com.github.jotask.neat.jneat.NeatEnemy;
  */
 public class BasicFitness implements Fitness {
 
+    private float movementRange = 1f;
+
     private int ticks;
 
     public BasicFitness() {
@@ -27,7 +30,12 @@ public class BasicFitness implements Fitness {
 
     @Override
     public double evaluate(NeatEnemy e) {
-        return ticks - (e.getScore() * 1.5);
+        double vel = 0.0;
+        final Vector2 v = e.getBody().getLinearVelocity();
+        if( Math.abs(v.len()) > movementRange){
+            vel = 10.0;
+        }
+        return ticks - (e.getScore() * 1.5) + vel;
     }
 
     @Override

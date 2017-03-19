@@ -7,7 +7,6 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.github.jotask.neat.Neat;
 import com.github.jotask.neat.engine.entity.Enemy;
 import com.github.jotask.neat.jneat.genetics.Genome;
-import com.github.jotask.neat.jneat.genetics.Specie;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.jneat.util.Util;
 import com.github.jotask.neat.util.JRandom;
@@ -22,7 +21,7 @@ public class NeatEnemy extends Enemy{
 
     private boolean disabled;
 
-    private Specie specie;
+    private Genome genome;
 
     private Vector2 v;
 
@@ -37,7 +36,7 @@ public class NeatEnemy extends Enemy{
 
 
     public void disable(){
-        this.specie = null;
+        this.genome = null;
         this.getBody().setLinearVelocity(0,0);
         this.getBody().setAngularVelocity(0f);
         this.setPosition(Vector2.Zero);
@@ -46,11 +45,11 @@ public class NeatEnemy extends Enemy{
         this.isBest = false;
     }
 
-    public void activate(final Specie species){
-        if(this.specie != null)
+    public void activate(final Genome genome){
+        if(this.genome != null)
             throw new RuntimeException("Species is not null");
 
-        this.specie = species;
+        this.genome = genome;
         this.setPosition(JRandom.randomPosition());
         this.getBody().setActive(true);
         this.disabled = false;
@@ -63,7 +62,7 @@ public class NeatEnemy extends Enemy{
         return e.dst(p);
     }
 
-    public Specie getSpecies() { return specie; }
+    public Genome getGenome() { return genome; }
 
     public boolean isDisabled() { return disabled; }
 
@@ -110,8 +109,6 @@ public class NeatEnemy extends Enemy{
         v.set(this.velocity);
 
     }
-
-    public Genome getGenome(){ return this.specie.genome; }
 
     @Override
     public void debug(ShapeRenderer sr) {
