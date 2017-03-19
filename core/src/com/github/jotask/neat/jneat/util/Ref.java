@@ -26,7 +26,7 @@ public class Ref {
 
     public static final float CONN_MUTATION    = .25f;
     public static final float LINK_MUTATION    = .25f;
-    public static final float BIAS_MUTATION    = .2f;
+    public static final float BIAS_MUTATION    = .1f;
     public static final float NODE_MUTATION    = .1f;
     public static final float ENABLE_MUTATION  = .02f;
     public static final float DISABLE_MUTATION = .04f;
