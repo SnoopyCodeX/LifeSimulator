@@ -24,11 +24,6 @@ public class Ref {
 
     public static final float MUTATION = 1f;
 
-    private static final int MAX_HIDDEN_NEURONS = 15;
-
-    public static final int MAX_NEURONS;
-    static{ MAX_NEURONS = INPUTS + OUTPUTS + MAX_HIDDEN_NEURONS; }
-
     public static final float CONN_MUTATION    = .25f;
     public static final float LINK_MUTATION    = .25f;
     public static final float BIAS_MUTATION    = .2f;
@@ -41,10 +36,10 @@ public class Ref {
 
     public static final float THRESHOLD = .5f;
 
-    public static final float INIT_TIME = 5f;
+    public static final float INIT_TIME = 1f;
 
-    public static final boolean SAVE = false;
-    public static final boolean LOAD = false;
+    public static final boolean SAVE = true;
+    public static final boolean LOAD = true;
 
     // FIXME two inputs synapses are connected
     // FIXME synapses disabled are innabled

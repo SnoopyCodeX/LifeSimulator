@@ -17,24 +17,25 @@ import static com.github.jotask.neat.jneat.util.Ref.STALE_SPECIES;
  */
 public class Population implements Json.Serializable{
 
-    public static int innovation = Ref.INPUTS + Ref.OUTPUTS - 1;
+    static int innovation = Ref.INPUTS + Ref.OUTPUTS - 1;
 
-    public final LinkedList<Specie> species;
-    public int generation;
+    private final List<Specie> species;
+    private int generation;
     public double maxFitness;
 
     public Population() {
-        this.species = new LinkedList<Specie>();
+        this.species = new ArrayList<Specie>();
         this.generation = 0;
         this.maxFitness = 0.0;
     }
 
     private void addToSpecies(final Genome child) {
-        for (final Specie species : this.species)
+        for (final Specie species : this.species) {
             if (child.sameSpecies(species.getGenomes().get(0))) {
                 species.getGenomes().add(child);
                 return;
             }
+        }
 
         final Specie childSpecies = new Specie();
         childSpecies.getGenomes().add(child);
@@ -53,11 +54,13 @@ public class Population implements Json.Serializable{
             });
 
             double remaining = Math.ceil(species.getGenomes().size() / 2.0);
-            if (cutToOne)
+            if (cutToOne) {
                 remaining = 1.0;
+            }
 
-            while (species.getGenomes().size() > remaining)
+            while (species.getGenomes().size() > remaining) {
                 species.getGenomes().remove(species.getGenomes().size() - 1);
+            }
         }
     }
 
@@ -70,35 +73,36 @@ public class Population implements Json.Serializable{
     }
 
     public void newGeneration() {
-
-        // kill overpopulation
         cullSpecies(false);
-
         rankGlobally();
-
-        // kill contaminated species
         removeStaleSpecies();
         rankGlobally();
-        for (final Specie species : this.species)
+        for (final Specie species : this.species) {
             species.calculateAverageFitness();
+        }
         removeWeakSpecies();
         final double sum = totalAverageFitness();
         final List<Genome> children = new ArrayList<Genome>();
         for (final Specie species : this.species) {
             final double breed = Math.floor(species.averageFitness / sum * Ref.POPULATION) - 1.0;
-            for (int i = 0; i < breed; ++i)
+            for (int i = 0; i < breed; ++i) {
                 children.add(species.breedChild());
+            }
         }
         cullSpecies(true);
+
         while (children.size() + species.size() < Ref.POPULATION) {
             final Specie species = this.species.get(JRandom.randomIndex(this.species));
             children.add(species.breedChild());
         }
-        for (final Genome child : children)
-            addToSpecies(child);
 
-        while(this.species.size() < Ref.POPULATION * .5f)
+        for (final Genome child : children) {
+            addToSpecies(child);
+        }
+
+        while(this.species.size() < Ref.POPULATION * .5f) {
             diversity();
+        }
 
         generation++;
     }
@@ -138,9 +142,11 @@ public class Population implements Json.Serializable{
 
     private void rankGlobally() {
         final List<Genome> global = new ArrayList<Genome>();
-        for (final Specie species : this.species)
-            for (final Genome genome : species.getGenomes())
+        for (final Specie species : this.species) {
+            for (final Genome genome : species.getGenomes()) {
                 global.add(genome);
+            }
+        }
 
         Collections.sort(global, new Comparator<Genome>() {
 
@@ -151,8 +157,9 @@ public class Population implements Json.Serializable{
             }
         });
 
-        for (int i = 0; i < global.size(); ++i)
+        for (int i = 0; i < global.size(); ++i) {
             global.get(i).globalRank = i;
+        }
     }
 
     private void removeStaleSpecies() {
@@ -170,16 +177,18 @@ public class Population implements Json.Serializable{
             if (species.getGenomes().get(0).fitness > species.topFitness) {
                 species.topFitness = species.getGenomes().get(0).fitness;
                 species.staleness = 0;
-            } else
+            } else {
                 ++species.staleness;
+            }
 
-            if (species.staleness < STALE_SPECIES
-                    || species.topFitness >= maxFitness)
+            if (species.staleness < STALE_SPECIES || species.topFitness >= maxFitness) {
                 survived.add(species);
+            }
         }
 
         species.clear();
         species.addAll(survived);
+
     }
 
     private void removeWeakSpecies() {
@@ -187,10 +196,10 @@ public class Population implements Json.Serializable{
 
         final double sum = totalAverageFitness();
         for (final Specie species : this.species) {
-            final double breed = Math
-                    .floor(species.averageFitness / sum * Ref.POPULATION);
-            if (breed >= 1.0)
+            final double breed = Math.floor(species.averageFitness / sum * Ref.POPULATION);
+            if (breed >= 1.0) {
                 survived.add(species);
+            }
         }
 
         species.clear();
@@ -199,12 +208,11 @@ public class Population implements Json.Serializable{
 
     private double totalAverageFitness() {
         double total = 0;
-        for (final Specie species : this.species)
+        for (final Specie species : this.species) {
             total += species.averageFitness;
+        }
         return total;
     }
-
-    public List<Specie> getSpecies() { return species; }
 
     @Override
     public void write(Json json) {
@@ -224,4 +232,9 @@ public class Population implements Json.Serializable{
             species.add(s);
         }
     }
+
+    public List<Specie> getSpecies() { return species; }
+
+    public int getGeneration() { return generation; }
+
 }
