@@ -10,6 +10,7 @@ import com.github.jotask.neat.jneat.genetics.Genome;
 import com.github.jotask.neat.jneat.network.Network;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.jneat.util.Util;
+import com.github.jotask.neat.engine.weapon.Weapon;
 import com.github.jotask.neat.util.JRandom;
 
 /**
@@ -30,8 +31,8 @@ public class NeatEnemy extends Enemy{
 
     public boolean isBest;
 
-    public NeatEnemy(Body body) {
-        super(body);
+    public NeatEnemy(Body body, final Weapon weapon) {
+        super(body, weapon);
         this.v = new Vector2();
         this.disable();
     }
@@ -78,17 +79,16 @@ public class NeatEnemy extends Enemy{
     @Override
     public void update() {
         super.update();
-//        this.clearForces();
     }
 
     private double[] getInputs() {
         final double[] inputs = new double[Ref.INPUTS];
-        inputs[0] = this.getBody().getPosition().x;
-        inputs[1] = this.getBody().getPosition().y;
+        inputs[Ref.Inputs.enemy_x.ordinal()] = this.getBody().getPosition().x;
+        inputs[Ref.Inputs.enemy_y.ordinal()] = this.getBody().getPosition().y;
         final Vector2 p = Neat.get().getPlayer().getBody().getPosition();
-        inputs[2] = p.x;
-        inputs[3] = p.y;
-        inputs[4] = 1.0d;
+        inputs[Ref.Inputs.player_x.ordinal()] = p.x;
+        inputs[Ref.Inputs.player_y.ordinal()] = p.y;
+        inputs[Ref.Inputs.bias.ordinal()] = 1.0d;
         return inputs;
     }
 
@@ -104,6 +104,18 @@ public class NeatEnemy extends Enemy{
         }
         if(Util.threshold(output[Ref.Outputs.down.ordinal()])) {
             getController().down();
+        }
+        if(Util.threshold(output[Ref.Outputs.w_left.ordinal()])) {
+            getWeaponController().left();
+        }
+        if(Util.threshold(output[Ref.Outputs.w_right.ordinal()])) {
+            getWeaponController().right();
+        }
+        if(Util.threshold(output[Ref.Outputs.w_up.ordinal()])) {
+            getWeaponController().up();
+        }
+        if(Util.threshold(output[Ref.Outputs.w_down.ordinal()])) {
+            getWeaponController().down();
         }
 
         v.set(this.velocity);

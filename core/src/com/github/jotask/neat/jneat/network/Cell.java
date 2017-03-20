@@ -15,8 +15,8 @@ import com.github.jotask.neat.jneat.util.Util;
  */
 public class Cell implements Renderer{
 
-    static float SIZE = 32;
-    static float offset = 5f;
+    static float SIZE = 16;
+    static float offset = 3f;
 
     private final Neuron neuron;
 

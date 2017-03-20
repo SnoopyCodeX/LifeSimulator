@@ -10,7 +10,7 @@ public class Ref {
 
     public enum Inputs { enemy_x, enemy_y, player_x, player_y, bias }
 
-    public enum Outputs{ left, right, up, down }
+    public enum Outputs{ left, right, up, down, w_left, w_right, w_up, w_down }
 
     public static final int INPUTS = Inputs.values().length;
     public static final int OUTPUTS = Outputs.values().length;
@@ -38,8 +38,8 @@ public class Ref {
 
     public static final float INIT_TIME = 1f;
 
-    public static final boolean SAVE = true;
-    public static final boolean LOAD = true;
+    public static final boolean SAVE = false;
+    public static final boolean LOAD = false;
 
     // FIXME two inputs synapses are connected
     // FIXME synapses disabled are innabled
