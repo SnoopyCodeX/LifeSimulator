@@ -30,7 +30,7 @@ public abstract class Files {
         test1.writeString(text, false);
 
         final FileHandle test2 = Gdx.files.local(FILE + "_bytes" + EXTENSION);
-        test2.writeBytes(text.getBytes(), false);
+        test2.writeBytes(Compressor.compress(text.getBytes()), false);
     }
 
     public static Population load(){
