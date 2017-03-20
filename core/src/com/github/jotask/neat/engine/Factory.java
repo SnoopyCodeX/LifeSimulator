@@ -6,6 +6,8 @@ import com.github.jotask.neat.Neat;
 import com.github.jotask.neat.engine.entity.Entity;
 import com.github.jotask.neat.engine.entity.Player;
 import com.github.jotask.neat.jneat.NeatEnemy;
+import com.github.jotask.neat.engine.weapon.Sword;
+import com.github.jotask.neat.engine.weapon.Weapon;
 import com.github.jotask.neat.util.Constant;
 import com.github.jotask.neat.util.JRandom;
 
@@ -60,7 +62,9 @@ public class Factory {
 
         Fixture enemyBody = createEntityBody(body, radius);
 
-        NeatEnemy enemy = new NeatEnemy(body);
+        final Weapon weapon = getSword();
+
+        NeatEnemy enemy = new NeatEnemy(body, weapon);
 
         body.setUserData(Entity.Type.ENEMY);
 
@@ -71,6 +75,31 @@ public class Factory {
         CollisionFilter.setMask(enemyBody, CollisionFilter.ENTITY.ENEMY);
 
         return enemy;
+
+    }
+
+    public Weapon getSword(){
+
+        BodyDef bd = new BodyDef();
+        bd.type = BodyDef.BodyType.DynamicBody;
+
+        final Body body = createBody(0,0);
+        final Weapon weapon = new Sword(body);
+
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(Sword.SIZE.x, Sword.SIZE.y);
+
+        FixtureDef fd = new FixtureDef();
+        fd.shape = shape;
+        fd.isSensor = true;
+
+        Fixture fixture = body.createFixture(fd);
+        fixture.setUserData(weapon);
+
+        CollisionFilter.setMask(fixture, CollisionFilter.ENTITY.ENEMY_FRIEND);
+
+        shape.dispose();
+        return weapon;
 
     }
 
