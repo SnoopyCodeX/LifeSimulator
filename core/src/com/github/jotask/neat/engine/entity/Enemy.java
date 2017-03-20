@@ -4,8 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.github.jotask.neat.engine.controller.EnemyController;
-import com.github.jotask.neat.engine.controller.WeaponController;
 import com.github.jotask.neat.engine.weapon.Weapon;
 
 /**
@@ -16,21 +14,18 @@ import com.github.jotask.neat.engine.weapon.Weapon;
  */
 public class Enemy extends Entity{
 
-    private final EnemyController controller;
-    private final WeaponController weaponController;
-
     public final Vector2 velocity;
 
-    public final float SPEED = 10;
+    private final float SPEED = 10;
 
-    private final Weapon weapon;
+    protected Weapon weapon;
 
-    public Enemy(final Body body, final Weapon weapon) {
+    protected int hits;
+
+    public Enemy(final Body body) {
         super(body);
-        this.weapon = weapon;
-        this.controller = new EnemyController(this);
         this.velocity = new Vector2();
-        this.weaponController = new WeaponController(weapon);
+        this.hits = 0;
     }
 
     @Override
@@ -57,7 +52,12 @@ public class Enemy extends Entity{
         sr.circle(getBody().getPosition().x, getBody().getPosition().y, .5f, 20);
     }
 
-    protected EnemyController getController() { return this.controller; }
-    protected WeaponController getWeaponController(){ return this.weaponController; }
+    public void equip(final Weapon weapon){
+        this.weapon = weapon;
+    }
+
+    public int getHits() { return hits; }
+
+    public void hit(){ this.hits++; }
 
 }

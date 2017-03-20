@@ -2,6 +2,7 @@ package com.github.jotask.neat.engine;
 
 import com.badlogic.gdx.physics.box2d.Filter;
 import com.badlogic.gdx.physics.box2d.Fixture;
+import com.github.jotask.neat.jneat.util.JException;
 
 /**
  * CollisionFilter
@@ -20,20 +21,16 @@ public class CollisionFilter {
         public static final short ENEMY = 4;
         public static final short PLAYER_FRIEND = 8;
         public static final short ENEMY_FRIEND = 16;
-        public static final short PLAYER_RADAR = 32;
-        public static final short ENEMY_RADAR = 64;
 
     }
 
     private static class MASK {
 
         public static final short WALLS = -1;
-        public static final short PLAYER = CATEGORY.WALLS;
-        public static final short ENEMY = CATEGORY.WALLS;
-        public static final short PLAYER_FRIEND = CATEGORY.WALLS;
-        public static final short ENEMY_FRIEND = CATEGORY.WALLS;
-        public static final short PLAYER_RADAR = CATEGORY.WALLS;
-        public static final short ENEMY_RADAR = CATEGORY.WALLS;
+        public static final short PLAYER = CATEGORY.WALLS | CATEGORY.ENEMY_FRIEND;
+        public static final short ENEMY = CATEGORY.WALLS | CATEGORY.PLAYER_FRIEND;
+        public static final short PLAYER_FRIEND = CATEGORY.WALLS | CATEGORY.ENEMY;
+        public static final short ENEMY_FRIEND = CATEGORY.WALLS | CATEGORY.PLAYER;
 
     }
 
@@ -55,12 +52,8 @@ public class CollisionFilter {
             case ENEMY_FRIEND:
                 set(fix, CATEGORY.ENEMY_FRIEND, MASK.ENEMY_FRIEND);
                 break;
-            case PLAYER_RADAR:
-                set(fix, CATEGORY.PLAYER_RADAR, MASK.PLAYER_RADAR);
-                break;
-            case ENEMY_RADAR:
-                set(fix, CATEGORY.ENEMY_RADAR, MASK.ENEMY_RADAR);
-                break;
+            default:
+                throw new JException("Collision filter not supported");
         }
 
     }

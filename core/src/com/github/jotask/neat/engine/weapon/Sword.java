@@ -46,7 +46,6 @@ public class Sword extends Weapon {
     public void enableSword(){
         final Shape s = this.body.getFixtureList().first().getShape();
         if(s instanceof PolygonShape){
-            final PolygonShape shape = (PolygonShape) s;
             ((PolygonShape) s).setAsBox(SIZE.x, SIZE.y);
         }
     }
@@ -54,8 +53,7 @@ public class Sword extends Weapon {
     public void disableSword(){
         final Shape s = this.body.getFixtureList().first().getShape();
         if(s instanceof PolygonShape){
-            final PolygonShape shape = (PolygonShape) s;
-            shape.setAsBox(.1f, .1f);
+            ((PolygonShape) s).setAsBox(0f, 0f);
         }else{
             System.err.println("Unknown");
         }
@@ -78,7 +76,6 @@ public class Sword extends Weapon {
     }
 
     private void stab(final float angle){
-
         final Vector2 p = body.getPosition().cpy();
         if(angle == 180){
             p.x -= SIZE.x;
@@ -110,7 +107,6 @@ public class Sword extends Weapon {
         }else if(angle == 180){
             sr.rect(p.x - (SIZE.x), p.y - (SIZE.y), SIZE.x * 2f, SIZE.y * 2f);
         }
-
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
 

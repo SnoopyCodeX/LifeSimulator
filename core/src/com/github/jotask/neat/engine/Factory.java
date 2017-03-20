@@ -62,9 +62,7 @@ public class Factory {
 
         Fixture enemyBody = createEntityBody(body, radius);
 
-        final Weapon weapon = getSword();
-
-        NeatEnemy enemy = new NeatEnemy(body, weapon);
+        NeatEnemy enemy = new NeatEnemy(body);
 
         body.setUserData(Entity.Type.ENEMY);
 
