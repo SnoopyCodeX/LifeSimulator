@@ -39,6 +39,11 @@ public abstract class Entity {
 
     }
 
+    protected void clearForces(){
+        this.getBody().setLinearVelocity(0,0);
+        this.getBody().setAngularVelocity(0);
+    }
+
     public void die(){ }
 
     public boolean isDie() { return die; }

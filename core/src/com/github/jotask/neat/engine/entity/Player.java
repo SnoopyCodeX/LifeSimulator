@@ -50,6 +50,7 @@ public class Player extends Entity{
     public void respawn(){
         Vector2 p = JRandom.randomPositionPlayer();
         this.getBody().setTransform(p, this.getBody().getAngle());
+        this.clearForces();
     }
 
     public void explode(){

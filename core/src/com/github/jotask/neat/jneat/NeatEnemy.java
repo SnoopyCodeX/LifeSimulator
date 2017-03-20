@@ -76,11 +76,6 @@ public class NeatEnemy extends Enemy{
 //        this.clearForces();
     }
 
-    private void clearForces(){
-        this.getBody().setLinearVelocity(0,0);
-        this.getBody().setAngularVelocity(0);
-    }
-
     public double[] getInputs() {
         final double[] inputs = new double[Ref.INPUTS];
         inputs[0] = this.getBody().getPosition().x;
