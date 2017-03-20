@@ -5,11 +5,14 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.github.jotask.neat.Neat;
+import com.github.jotask.neat.engine.controller.EnemyController;
+import com.github.jotask.neat.engine.controller.WeaponController;
 import com.github.jotask.neat.engine.entity.Enemy;
 import com.github.jotask.neat.jneat.genetics.Genome;
 import com.github.jotask.neat.jneat.network.Network;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.jneat.util.Util;
+import com.github.jotask.neat.engine.weapon.Weapon;
 import com.github.jotask.neat.util.JRandom;
 
 /**
@@ -19,6 +22,9 @@ import com.github.jotask.neat.util.JRandom;
  * @since 10/03/2017
  */
 public class NeatEnemy extends Enemy{
+
+    private EnemyController controller;
+    private WeaponController weaponController;
 
     private boolean disabled;
 
@@ -33,6 +39,7 @@ public class NeatEnemy extends Enemy{
     public NeatEnemy(Body body) {
         super(body);
         this.v = new Vector2();
+        this.controller = new EnemyController(this);
         this.disable();
     }
 
@@ -46,6 +53,7 @@ public class NeatEnemy extends Enemy{
         this.getBody().setActive(false);
         this.disabled = true;
         this.isBest = false;
+        this.hits = 0;
     }
 
     public void activate(final Genome genome){
@@ -56,8 +64,8 @@ public class NeatEnemy extends Enemy{
         this.setPosition(JRandom.randomPosition());
         this.getBody().setActive(true);
         this.disabled = false;
-
         this.network = new Network(this.genome.getGenes());
+        this.hits = 0;
 
     }
 
@@ -78,32 +86,43 @@ public class NeatEnemy extends Enemy{
     @Override
     public void update() {
         super.update();
-//        this.clearForces();
     }
 
     private double[] getInputs() {
         final double[] inputs = new double[Ref.INPUTS];
-        inputs[0] = this.getBody().getPosition().x;
-        inputs[1] = this.getBody().getPosition().y;
+        inputs[Ref.Inputs.enemy_x.ordinal()] = this.getBody().getPosition().x;
+        inputs[Ref.Inputs.enemy_y.ordinal()] = this.getBody().getPosition().y;
         final Vector2 p = Neat.get().getPlayer().getBody().getPosition();
-        inputs[2] = p.x;
-        inputs[3] = p.y;
-        inputs[4] = 1.0d;
+        inputs[Ref.Inputs.player_x.ordinal()] = p.x;
+        inputs[Ref.Inputs.player_y.ordinal()] = p.y;
+        inputs[Ref.Inputs.bias.ordinal()] = 1.0d;
         return inputs;
     }
 
     private void setOutput(final double[] output) {
         if(Util.threshold(output[Ref.Outputs.left.ordinal()])) {
-            getController().left();
+            this.controller.left();
         }
         if(Util.threshold(output[Ref.Outputs.right.ordinal()])) {
-            getController().right();
+            this.controller.right();
         }
         if(Util.threshold(output[Ref.Outputs.up.ordinal()])) {
-            getController().up();
+            this.controller.up();
         }
         if(Util.threshold(output[Ref.Outputs.down.ordinal()])) {
-            getController().down();
+            this.controller.down();
+        }
+        if(Util.threshold(output[Ref.Outputs.w_left.ordinal()])) {
+            this.weaponController.left();
+        }
+        if(Util.threshold(output[Ref.Outputs.w_right.ordinal()])) {
+            this.weaponController.right();
+        }
+        if(Util.threshold(output[Ref.Outputs.w_up.ordinal()])) {
+            this.weaponController.up();
+        }
+        if(Util.threshold(output[Ref.Outputs.w_down.ordinal()])) {
+            this.weaponController.down();
         }
 
         v.set(this.velocity);
@@ -142,4 +161,10 @@ public class NeatEnemy extends Enemy{
 
     public Network getNetwork() { return network; }
 
+    @Override
+    public void equip(Weapon weapon) {
+        super.equip(weapon);
+        this.weapon.equip(this);
+        this.weaponController = new WeaponController(this.weapon);
+    }
 }

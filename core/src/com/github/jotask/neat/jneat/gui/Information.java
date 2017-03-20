@@ -74,7 +74,7 @@ public class Information implements Renderer {
 
         new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Species") {
             @Override
-            void set() { this.t = neat.getPopulation(); }
+            void set() { this.t = neat.getPopulationSize(); }
         };
 
         new Inform<Integer>(this.info, font, x, y - SPACE * i++, "Active") {

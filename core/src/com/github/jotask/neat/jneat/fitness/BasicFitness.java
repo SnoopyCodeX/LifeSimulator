@@ -33,9 +33,9 @@ public class BasicFitness implements Fitness {
         double vel = 0.0;
         final Vector2 v = e.getBody().getLinearVelocity();
         if( Math.abs(v.len()) > movementRange){
-            vel = 10.0;
+            vel = 5.0;
         }
-        return ticks - (e.getScore() * 1.5) + vel;
+        return ticks - (e.getScore() * 1.5f) + vel + (e.getHits() * 1.5f) ;
     }
 
     @Override

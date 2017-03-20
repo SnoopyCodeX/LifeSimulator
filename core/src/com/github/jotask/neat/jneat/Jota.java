@@ -47,7 +47,7 @@ public class Jota implements Renderer {
         this.population = Files.load();
 
         this.fitness = new BasicFitness();
-        initializeGame();
+        this.initializeGame();
 
     }
 
@@ -63,7 +63,7 @@ public class Jota implements Renderer {
         }
     }
 
-    public void initializeGame() {
+    private void initializeGame() {
         best = null;
         this.manager.clear();
         for (final Specie specie : this.population.getSpecies()) {
@@ -151,7 +151,7 @@ public class Jota implements Renderer {
         gl.glDisable(GL20.GL_BLEND);
     }
 
-    public int getPopulation() { return this.population.getSpecies().size(); }
+    public int getPopulationSize() { return this.population.getSpecies().size(); }
 
     public JotaManager getManager() { return manager; }
 

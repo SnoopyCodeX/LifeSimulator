@@ -1,6 +1,8 @@
 package com.github.jotask.neat.jneat;
 
 import com.github.jotask.neat.Neat;
+import com.github.jotask.neat.engine.Factory;
+import com.github.jotask.neat.engine.weapon.Weapon;
 import com.github.jotask.neat.jneat.genetics.Genome;
 import com.github.jotask.neat.jneat.util.Ref;
 
@@ -21,8 +23,12 @@ public final class JotaManager {
         this.active = new LinkedList<NeatEnemy>();
         this.disabled = new LinkedList<NeatEnemy>();
 
+        final Factory factory = Neat.get().getFactory();
+
         for(int i = 0; i < Ref.POPULATION; i++){
-            final NeatEnemy e = Neat.get().getFactory().getNeatEnemy();
+            final NeatEnemy e = factory.getNeatEnemy();
+            final Weapon sword = factory.getSword();
+            e.equip(sword);
             e.disable();
             this.disabled.add(e);
         }
