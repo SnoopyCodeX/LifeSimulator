@@ -48,6 +48,7 @@ public class Jota implements Renderer {
 
         this.fitness = new BasicFitness();
         initializeGame();
+
     }
 
     public void eval() {
@@ -107,14 +108,19 @@ public class Jota implements Renderer {
         }
 
         if (timer.isPassed()) {
-            this.gui.getFitness().addFitness(this.population.getGeneration(), this.best.getGenome().fitness);
-            this.manager.clear();
-            this.fitness.reset();
-            this.population.newGeneration();
-            initializeGame();
-            Neat.get().getPlayer().respawn();
-            this.timer.reset();
+            nextGeneration();
         }
+
+    }
+
+    private void nextGeneration(){
+        this.gui.getFitness().addFitness(this.population.getGeneration(), this.best.getGenome().fitness);
+        this.manager.clear();
+        this.fitness.reset();
+        this.population.newGeneration();
+        this.initializeGame();
+        Neat.get().getPlayer().respawn();
+        this.timer.reset();
     }
 
     private void setBest(NeatEnemy fp){
