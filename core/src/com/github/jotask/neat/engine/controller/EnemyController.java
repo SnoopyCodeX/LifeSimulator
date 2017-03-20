@@ -1,6 +1,5 @@
 package com.github.jotask.neat.engine.controller;
 
-import com.github.jotask.neat.util.JRandom;
 import com.github.jotask.neat.engine.entity.Enemy;
 
 /**
@@ -16,8 +15,6 @@ public class EnemyController {
     public EnemyController(Enemy enemy) {
         this.enemy = enemy;
     }
-
-    public void moveRandom(){ enemy.velocity.set(JRandom.getDir()); }
 
     public void left(){ enemy.velocity.add(-1, 0); }
 
