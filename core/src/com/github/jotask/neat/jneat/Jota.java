@@ -58,9 +58,7 @@ public class Jota implements Renderer {
             if (e.isDisabled() || e.isDie())
                 continue;
 
-            final double[] input = e.getInputs();
-            final double[] output = e.getGenome().getNetwork().evaluate(input);
-            e.setOutput(output);
+            e.evaluateNetwork();
 
         }
     }
@@ -70,7 +68,6 @@ public class Jota implements Renderer {
         this.manager.clear();
         for (final Specie specie : this.population.getSpecies()) {
             for(final Genome genome: specie.getGenomes()) {
-                genome.generateNetwork();
                 this.manager.spawn(genome);
             }
         }

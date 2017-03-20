@@ -63,10 +63,10 @@ public class NetworkRenderer implements Renderer {
     public void createNetwork(NeatEnemy e) {
         this.graph.clear();
 
-        if(e.getGenome().getNetwork() == this.network){
+        if(e.getNetwork() == this.network){
             return;
         }else{
-            this.network = e.getGenome().getNetwork();
+            this.network = e.getNetwork();
         }
 
         // Create new network for render

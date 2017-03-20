@@ -2,7 +2,6 @@ package com.github.jotask.neat.jneat.genetics;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import com.github.jotask.neat.jneat.network.Network;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.util.JRandom;
 
@@ -26,8 +25,6 @@ public class Genome implements Json.Serializable{
     int maxNeuron;
     int globalRank;
     double step_size = STEP_SIZE;
-
-    private Network network;
 
     Genome() {
         this.genes = new LinkedList<Synapse>();
@@ -65,10 +62,6 @@ public class Genome implements Json.Serializable{
             ++disjointGenes;
         }
         return disjointGenes / Math.max(genes.size(), genome.genes.size());
-    }
-
-    public void generateNetwork(){
-        this.network = new Network(this.genes);
     }
 
     void mutate() {
@@ -241,8 +234,6 @@ public class Genome implements Json.Serializable{
         }
     }
 
-    public List<Synapse> getGenes() { return genes; }
-
-    public Network getNetwork() { return network; }
+    public LinkedList<Synapse> getGenes() { return genes; }
 
 }

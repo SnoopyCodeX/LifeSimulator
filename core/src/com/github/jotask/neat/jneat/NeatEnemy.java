@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.github.jotask.neat.Neat;
 import com.github.jotask.neat.engine.entity.Enemy;
 import com.github.jotask.neat.jneat.genetics.Genome;
+import com.github.jotask.neat.jneat.network.Network;
 import com.github.jotask.neat.jneat.util.Ref;
 import com.github.jotask.neat.jneat.util.Util;
 import com.github.jotask.neat.util.JRandom;
@@ -25,18 +26,20 @@ public class NeatEnemy extends Enemy{
 
     private Vector2 v;
 
+    private Network network;
+
     public boolean isBest;
 
     public NeatEnemy(Body body) {
         super(body);
         this.v = new Vector2();
         this.disable();
-
     }
 
 
     public void disable(){
         this.genome = null;
+        this.network = null;
         this.getBody().setLinearVelocity(0,0);
         this.getBody().setAngularVelocity(0f);
         this.setPosition(Vector2.Zero);
@@ -53,6 +56,8 @@ public class NeatEnemy extends Enemy{
         this.setPosition(JRandom.randomPosition());
         this.getBody().setActive(true);
         this.disabled = false;
+
+        this.network = new Network(this.genome.getGenes());
 
     }
 
@@ -76,7 +81,7 @@ public class NeatEnemy extends Enemy{
 //        this.clearForces();
     }
 
-    public double[] getInputs() {
+    private double[] getInputs() {
         final double[] inputs = new double[Ref.INPUTS];
         inputs[0] = this.getBody().getPosition().x;
         inputs[1] = this.getBody().getPosition().y;
@@ -87,7 +92,7 @@ public class NeatEnemy extends Enemy{
         return inputs;
     }
 
-    public void setOutput(final double[] output) {
+    private void setOutput(final double[] output) {
         if(Util.threshold(output[Ref.Outputs.left.ordinal()])) {
             getController().left();
         }
@@ -128,5 +133,13 @@ public class NeatEnemy extends Enemy{
         sr.line(x, y, w, h);
 
     }
+
+    public void evaluateNetwork() {
+        final double[] input = this.getInputs();
+        final double[] output = this.network.evaluate(input);
+        this.setOutput(output);
+    }
+
+    public Network getNetwork() { return network; }
 
 }
