@@ -2,12 +2,12 @@ package com.github.jotask.neat.jneat.genetics;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.config.Config;
+import com.github.jotask.neat.jneat.Jota;
+import com.github.jotask.neat.jneat.util.Constants;
 import com.github.jotask.neat.util.JRandom;
 
 import java.util.*;
-
-import static com.github.jotask.neat.jneat.util.Ref.STALE_SPECIES;
 
 /**
  * Population
@@ -17,13 +17,19 @@ import static com.github.jotask.neat.jneat.util.Ref.STALE_SPECIES;
  */
 public class Population implements Json.Serializable{
 
-    static int innovation = Ref.INPUTS + Ref.OUTPUTS - 1;
+    private final int POPULATION;
+    private final int STALE_SPECIES;
+
+    static int innovation = Constants.INPUTS + Constants.OUTPUTS - 1;
 
     private final List<Specie> species;
     private int generation;
     public double maxFitness;
 
     public Population() {
+        final Config cfg = Jota.get().getConfig();
+        POPULATION = new Integer(cfg.get(Config.Property.POPULATION));
+        STALE_SPECIES = new Integer(cfg.get(Config.Property.STALE_SPECIES));
         this.species = new ArrayList<Specie>();
         this.generation = 0;
         this.maxFitness = 0.0;
@@ -65,7 +71,7 @@ public class Population implements Json.Serializable{
     }
 
     public void initialize() {
-        for (int i = 0; i < Ref.POPULATION; ++i) {
+        for (int i = 0; i < POPULATION; ++i) {
             final Genome basic = new Genome();
             basic.mutate();
             addToSpecies(basic);
@@ -84,14 +90,14 @@ public class Population implements Json.Serializable{
         final double sum = totalAverageFitness();
         final List<Genome> children = new ArrayList<Genome>();
         for (final Specie species : this.species) {
-            final double breed = Math.floor(species.averageFitness / sum * Ref.POPULATION) - 1.0;
+            final double breed = Math.floor(species.averageFitness / sum * POPULATION) - 1.0;
             for (int i = 0; i < breed; ++i) {
                 children.add(species.breedChild());
             }
         }
         cullSpecies(true);
 
-        while (children.size() + species.size() < Ref.POPULATION) {
+        while (children.size() + species.size() < POPULATION) {
             final Specie species = this.species.get(JRandom.randomIndex(this.species));
             children.add(species.breedChild());
         }
@@ -100,7 +106,7 @@ public class Population implements Json.Serializable{
             addToSpecies(child);
         }
 
-        while(this.species.size() < Ref.POPULATION * .5f) {
+        while(this.species.size() < POPULATION * .5f) {
             diversity();
         }
 
@@ -196,7 +202,7 @@ public class Population implements Json.Serializable{
 
         final double sum = totalAverageFitness();
         for (final Specie species : this.species) {
-            final double breed = Math.floor(species.averageFitness / sum * Ref.POPULATION);
+            final double breed = Math.floor(species.averageFitness / sum * POPULATION);
             if (breed >= 1.0) {
                 survived.add(species);
             }

@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.jneat.gui.Renderer;
-import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.jneat.util.Constants;
 import com.github.jotask.neat.jneat.util.Util;
 
 /**
@@ -40,7 +40,7 @@ public class Cell implements Renderer{
         this.size = size;
 
         if(Util.isInput(this.neuron.getId())) {
-            if(this.neuron.getId() == Ref.Inputs.bias.ordinal()) {
+            if(this.neuron.getId() == Constants.Inputs.bias.ordinal()) {
                 bg = Color.CLEAR;
             }else {
                 bg = Color.LIME;

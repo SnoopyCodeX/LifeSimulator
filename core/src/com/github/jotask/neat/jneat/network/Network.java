@@ -1,12 +1,12 @@
 package com.github.jotask.neat.jneat.network;
 
-import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.jneat.util.Constants;
 import com.github.jotask.neat.jneat.genetics.Synapse;
 
 import java.util.*;
 
-import static com.github.jotask.neat.jneat.util.Ref.INPUTS;
-import static com.github.jotask.neat.jneat.util.Ref.OUTPUTS;
+import static com.github.jotask.neat.jneat.util.Constants.INPUTS;
+import static com.github.jotask.neat.jneat.util.Constants.OUTPUTS;
 
 /**
  * Network
@@ -21,11 +21,11 @@ public class Network {
     public Network(final LinkedList<Synapse> genes) {
 
         this.network = new HashMap<Integer, Neuron>();
-        for(int i = 0; i < Ref.INPUTS; i++){
+        for(int i = 0; i < Constants.INPUTS; i++){
             network.put(i, new Neuron(i));
         }
-        for(int i = 0; i < Ref.OUTPUTS; i++){
-            final int id = Ref.INPUTS + i;
+        for(int i = 0; i < Constants.OUTPUTS; i++){
+            final int id = Constants.INPUTS + i;
             this.network.put(id, new Neuron(id));
         }
         Collections.sort(genes, new Comparator<Synapse>() {
@@ -53,13 +53,13 @@ public class Network {
 
     public double[] evaluate(final double[] inputs){
 
-        for(int i = 0; i < Ref.INPUTS; i++){
+        for(int i = 0; i < Constants.INPUTS; i++){
             network.get(i).setValue(inputs[i]);
         }
 
         for(final Map.Entry<Integer, Neuron> entry: network.entrySet()){
 
-            if(entry.getKey() < Ref.INPUTS + Ref.OUTPUTS){
+            if(entry.getKey() < Constants.INPUTS + Constants.OUTPUTS){
                 continue;
             }
 
@@ -91,9 +91,9 @@ public class Network {
             }
         }
 
-        final double[] output = new double[Ref.OUTPUTS];
-        for(int i = 0; i < Ref.OUTPUTS; i++){
-            output[i] = network.get(Ref.INPUTS + i).getValue();
+        final double[] output = new double[Constants.OUTPUTS];
+        for(int i = 0; i < Constants.OUTPUTS; i++){
+            output[i] = network.get(Constants.INPUTS + i).getValue();
         }
         return output;
     }

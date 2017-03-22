@@ -8,11 +8,10 @@ import com.github.jotask.neat.Neat;
 import com.github.jotask.neat.engine.controller.EnemyController;
 import com.github.jotask.neat.engine.controller.WeaponController;
 import com.github.jotask.neat.engine.entity.Enemy;
+import com.github.jotask.neat.engine.weapon.Weapon;
 import com.github.jotask.neat.jneat.genetics.Genome;
 import com.github.jotask.neat.jneat.network.Network;
-import com.github.jotask.neat.jneat.util.Ref;
-import com.github.jotask.neat.jneat.util.Util;
-import com.github.jotask.neat.engine.weapon.Weapon;
+import com.github.jotask.neat.jneat.util.Constants;
 import com.github.jotask.neat.util.JRandom;
 
 /**
@@ -34,10 +33,13 @@ public class NeatEnemy extends Enemy{
 
     private Network network;
 
+    private final float THRESHOLD;
+
     public boolean isBest;
 
-    public NeatEnemy(Body body) {
+    public NeatEnemy(Body body, final float THRESHOLD) {
         super(body);
+        this.THRESHOLD = THRESHOLD;
         this.v = new Vector2();
         this.controller = new EnemyController(this);
         this.disable();
@@ -89,39 +91,39 @@ public class NeatEnemy extends Enemy{
     }
 
     private double[] getInputs() {
-        final double[] inputs = new double[Ref.INPUTS];
-        inputs[Ref.Inputs.enemy_x.ordinal()] = this.getBody().getPosition().x;
-        inputs[Ref.Inputs.enemy_y.ordinal()] = this.getBody().getPosition().y;
+        final double[] inputs = new double[Constants.INPUTS];
+        inputs[Constants.Inputs.enemy_x.ordinal()] = this.getBody().getPosition().x;
+        inputs[Constants.Inputs.enemy_y.ordinal()] = this.getBody().getPosition().y;
         final Vector2 p = Neat.get().getPlayer().getBody().getPosition();
-        inputs[Ref.Inputs.player_x.ordinal()] = p.x;
-        inputs[Ref.Inputs.player_y.ordinal()] = p.y;
-        inputs[Ref.Inputs.bias.ordinal()] = 1.0d;
+        inputs[Constants.Inputs.player_x.ordinal()] = p.x;
+        inputs[Constants.Inputs.player_y.ordinal()] = p.y;
+        inputs[Constants.Inputs.bias.ordinal()] = 1.0d;
         return inputs;
     }
 
     private void setOutput(final double[] output) {
-        if(Util.threshold(output[Ref.Outputs.left.ordinal()])) {
+        if((output[Constants.Outputs.left.ordinal()]) > THRESHOLD) {
             this.controller.left();
         }
-        if(Util.threshold(output[Ref.Outputs.right.ordinal()])) {
+        if(output[Constants.Outputs.right.ordinal()] > THRESHOLD) {
             this.controller.right();
         }
-        if(Util.threshold(output[Ref.Outputs.up.ordinal()])) {
+        if(output[Constants.Outputs.up.ordinal()] > THRESHOLD) {
             this.controller.up();
         }
-        if(Util.threshold(output[Ref.Outputs.down.ordinal()])) {
+        if(output[Constants.Outputs.down.ordinal()] > THRESHOLD) {
             this.controller.down();
         }
-        if(Util.threshold(output[Ref.Outputs.w_left.ordinal()])) {
+        if(output[Constants.Outputs.w_left.ordinal()] > THRESHOLD) {
             this.weaponController.left();
         }
-        if(Util.threshold(output[Ref.Outputs.w_right.ordinal()])) {
+        if(output[Constants.Outputs.w_right.ordinal()] > THRESHOLD) {
             this.weaponController.right();
         }
-        if(Util.threshold(output[Ref.Outputs.w_up.ordinal()])) {
+        if(output[Constants.Outputs.w_up.ordinal()] > THRESHOLD) {
             this.weaponController.up();
         }
-        if(Util.threshold(output[Ref.Outputs.w_down.ordinal()])) {
+        if(output[Constants.Outputs.w_down.ordinal()] > THRESHOLD) {
             this.weaponController.down();
         }
 

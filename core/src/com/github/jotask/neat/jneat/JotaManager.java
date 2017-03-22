@@ -1,10 +1,10 @@
 package com.github.jotask.neat.jneat;
 
 import com.github.jotask.neat.Neat;
+import com.github.jotask.neat.config.Config;
 import com.github.jotask.neat.engine.Factory;
 import com.github.jotask.neat.engine.weapon.Weapon;
 import com.github.jotask.neat.jneat.genetics.Genome;
-import com.github.jotask.neat.jneat.util.Ref;
 
 import java.util.LinkedList;
 
@@ -25,8 +25,11 @@ public final class JotaManager {
 
         final Factory factory = Neat.get().getFactory();
 
-        for(int i = 0; i < Ref.POPULATION; i++){
-            final NeatEnemy e = factory.getNeatEnemy();
+        final int population = new Integer(Jota.get().getConfig().get(Config.Property.POPULATION));
+        final float threshold = new Float(Jota.get().getConfig().get(Config.Property.THRESHOLD));
+
+        for(int i = 0; i < population; i++){
+            final NeatEnemy e = factory.getNeatEnemy(threshold);
             final Weapon sword = factory.getSword();
             e.equip(sword);
             e.disable();
