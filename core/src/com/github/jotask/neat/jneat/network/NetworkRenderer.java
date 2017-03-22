@@ -10,7 +10,7 @@ import com.github.jotask.neat.jneat.Jota;
 import com.github.jotask.neat.jneat.NeatEnemy;
 import com.github.jotask.neat.jneat.genetics.Synapse;
 import com.github.jotask.neat.jneat.gui.Renderer;
-import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.jneat.util.Constants;
 import com.github.jotask.neat.jneat.util.Util;
 
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class NetworkRenderer implements Renderer {
         this.neat = neat;
         final OrthographicCamera cam = Neat.get().getGui().getCamera();
         float w = cam.viewportWidth * .5f;
-        float h = Cell.SIZE * Ref.INPUTS;
+        float h = Cell.SIZE * Constants.INPUTS;
 //        float x = cam.position.x - (w * .5f);
         float x = cam.position.x - 25;
         float y = cam.position.y - (h *.5f);
@@ -70,8 +70,8 @@ public class NetworkRenderer implements Renderer {
         }
 
         // Create new network for render
-        float yInpStart = rectangle.y + (rectangle.height * .5f) + ((Cell.SIZE * Ref.INPUTS) * .5f) - Cell.SIZE;
-        float yOutStart = rectangle.y + (rectangle.height * .5f) + ((Cell.SIZE * Ref.OUTPUTS) * .5f) - Cell.SIZE;
+        float yInpStart = rectangle.y + (rectangle.height * .5f) + ((Cell.SIZE * Constants.INPUTS) * .5f) - Cell.SIZE;
+        float yOutStart = rectangle.y + (rectangle.height * .5f) + ((Cell.SIZE * Constants.OUTPUTS) * .5f) - Cell.SIZE;
 
         int input = 0;
         int output = 0;

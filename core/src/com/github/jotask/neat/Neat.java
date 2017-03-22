@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
+import com.github.jotask.neat.config.LoadConfig;
 import com.github.jotask.neat.engine.*;
 import com.github.jotask.neat.engine.entity.Player;
 import com.github.jotask.neat.jneat.Jota;
@@ -70,7 +71,7 @@ public class Neat extends ApplicationAdapter {
 
 		this.player = factory.getPlayer();
 
-		this.jota = new Jota();
+		this.jota = new Jota(LoadConfig.loadDefault());
 
 	}
 

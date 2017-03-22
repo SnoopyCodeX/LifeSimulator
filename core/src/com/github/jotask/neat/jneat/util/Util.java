@@ -5,7 +5,6 @@ import com.github.jotask.neat.util.JRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 
 /**
  * Util
@@ -28,7 +27,7 @@ public final class Util {
      * @return if the id corresponds to an Input neuron
      */
     public static boolean isInput(final int id){
-        return (id < Ref.INPUTS);
+        return (id < Constants.INPUTS);
     }
 
     /**
@@ -36,21 +35,14 @@ public final class Util {
      * @param id the id to check
      * @return if the id corresponds to an Output neuron
      */
-    public static boolean isOutput(final int id){ return ((id >= Ref.INPUTS) && (id < Ref.INPUTS + Ref.OUTPUTS)); }
+    public static boolean isOutput(final int id){ return ((id >= Constants.INPUTS) && (id < Constants.INPUTS + Constants.OUTPUTS)); }
 
     /**
      * Know if a id for a neuron is an Hidden neuron
      * @param id the id to check
      * @return if the id corresponds to a Hidden neuron
      */
-    public static boolean isHidden(final int id){ return (id >= Ref.INPUTS + Ref.OUTPUTS); }
-
-    /**
-     *Check if the output value from a neuron is enough to move the entity
-     * @param value the value to check
-     * @return if is enough to move the entity
-     */
-    public static boolean threshold(double value){ return (value > Ref.THRESHOLD); }
+    public static boolean isHidden(final int id){ return (id >= Constants.INPUTS + Constants.OUTPUTS); }
 
     /**
      * Limit on double number to only contain n decimals
@@ -85,27 +77,6 @@ public final class Util {
         int r = JRandom.randomIndex(other);
 
         return other.get(r);
-
-    }
-
-    public static void main(String[] args) {
-        final ArrayList<Integer> numbers = new ArrayList<Integer>();
-        for(int i = 0; i < 10; i++){
-            numbers.add(i);
-        }
-
-        final HashMap<Integer, Integer> probs = new HashMap<Integer, Integer>();
-        for(int i = 0; i < numbers.size(); i++){
-            probs.put(i, 0);
-        }
-
-        System.out.println(probs.toString());
-        for(int i = 0; i < 10000; i++){
-            int tmp = indexByProbability(numbers);
-            int v = probs.get(tmp) + 1;
-            probs.put(tmp, v);
-        }
-        System.out.println(probs.toString());
 
     }
 

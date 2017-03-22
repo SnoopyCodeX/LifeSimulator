@@ -2,14 +2,16 @@ package com.github.jotask.neat.jneat.genetics;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.config.Config;
+import com.github.jotask.neat.jneat.Jota;
+import com.github.jotask.neat.jneat.util.Constants;
 import com.github.jotask.neat.util.JRandom;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.github.jotask.neat.jneat.util.Ref.*;
+import static com.github.jotask.neat.jneat.util.Constants.*;
 
 /**
  * Genome
@@ -19,18 +21,43 @@ import static com.github.jotask.neat.jneat.util.Ref.*;
  */
 public class Genome implements Json.Serializable{
 
+    private final float CONN_MUTATION;
+    private final float LINK_MUTATION;
+    private final float BIAS_MUTATION;
+    private final float ENABLE_MUTATION;
+    private final float DISABLE_MUTATION;
+    private final float NODE_MUTATION;
+    private final float PERTURBATION;
+    private final float DELTA_DISJOINT;
+    private final float DELTA_THRESHOLD;
+    private final float DELTA_WEIGHTS;
+
     private final LinkedList<Synapse> genes;
     public double fitness;
 
     int maxNeuron;
     int globalRank;
-    double step_size = STEP_SIZE;
+    double step_size;
 
     Genome() {
+
+        final Config cfg = Jota.get().getConfig();
+        CONN_MUTATION = new Float(cfg.get(Config.Property.CONN_MUTATION));
+        LINK_MUTATION = new Float(cfg.get(Config.Property.LINK_MUTATION));
+        BIAS_MUTATION = new Float(cfg.get(Config.Property.BIAS_MUTATION));
+        NODE_MUTATION = new Float(cfg.get(Config.Property.NODE_MUTATION));
+        ENABLE_MUTATION = new Float(cfg.get(Config.Property.ENABLE_MUTATION));
+        DISABLE_MUTATION = new Float(cfg.get(Config.Property.DISABLE_MUTATION));
+        PERTURBATION = new Float(cfg.get(Config.Property.PERTURBATION));
+        DELTA_DISJOINT = new Float(cfg.get(Config.Property.DELTA_DISJOINT));
+        DELTA_THRESHOLD = new Float(cfg.get(Config.Property.DELTA_THRESHOLD));
+        DELTA_WEIGHTS = new Float(cfg.get(Config.Property.DELTA_WEIGHTS));
+
         this.genes = new LinkedList<Synapse>();
         this.fitness = 0.0;
-        this.maxNeuron =  Ref.INPUTS + Ref.OUTPUTS - 1;
+        this.maxNeuron =  Constants.INPUTS + Constants.OUTPUTS - 1;
         this.globalRank = 0;
+        this.step_size = new Double(Jota.get().getConfig().get(Config.Property.STEP_SIZE));
     }
 
     Genome(final Genome genome) {

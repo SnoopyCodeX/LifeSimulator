@@ -53,7 +53,7 @@ public class Factory {
 
     }
 
-    public final NeatEnemy getNeatEnemy(){
+    public final NeatEnemy getNeatEnemy(final float threshold){
 
         final Vector2 p = JRandom.randomPosition();
         float radius = .5f;
@@ -62,7 +62,7 @@ public class Factory {
 
         Fixture enemyBody = createEntityBody(body, radius);
 
-        NeatEnemy enemy = new NeatEnemy(body);
+        NeatEnemy enemy = new NeatEnemy(body, threshold);
 
         body.setUserData(Entity.Type.ENEMY);
 

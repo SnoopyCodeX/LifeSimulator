@@ -2,12 +2,11 @@ package com.github.jotask.neat.jneat.genetics;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import com.github.jotask.neat.config.Config;
+import com.github.jotask.neat.jneat.Jota;
 import com.github.jotask.neat.util.JRandom;
 
 import java.util.LinkedList;
-
-import static com.github.jotask.neat.jneat.util.Ref.CROSSOVER;
-import static com.github.jotask.neat.jneat.util.Ref.MUTATION;
 
 /**
  * Specie
@@ -17,12 +16,18 @@ import static com.github.jotask.neat.jneat.util.Ref.MUTATION;
  */
 public class Specie implements Json.Serializable{
 
+    final float CROSSOVER;
+    final float MUTATION;
+
     private final LinkedList<Genome> genomes;
     double topFitness;
     double averageFitness;
     int staleness;
 
     Specie() {
+        final Config cfg = Jota.get().getConfig();
+        CROSSOVER = new Float(cfg.get(Config.Property.CROSSOVER));
+        MUTATION = new Float(cfg.get(Config.Property.MUTATION));
         this.genomes = new LinkedList<Genome>();
         this.topFitness = 0.0;
         this.averageFitness = 0.0;

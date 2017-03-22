@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Json;
 import com.github.jotask.neat.jneat.genetics.Population;
-import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.jneat.util.Constants;
 
 /**
  * Files
@@ -36,7 +36,7 @@ public abstract class Files {
     public static Population load(){
         FileHandle fileHandle = Gdx.files.local(FILE + EXTENSION);
 
-        if(!Ref.LOAD){
+        if(!Constants.LOAD){
             fileHandle.delete();
         }
 

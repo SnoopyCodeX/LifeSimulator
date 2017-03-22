@@ -4,17 +4,18 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.Neat;
-import com.github.jotask.neat.jneat.genetics.Genome;
-import com.github.jotask.neat.util.Timer;
+import com.github.jotask.neat.config.Config;
 import com.github.jotask.neat.jneat.fitness.BasicFitness;
 import com.github.jotask.neat.jneat.fitness.Fitness;
+import com.github.jotask.neat.jneat.genetics.Genome;
 import com.github.jotask.neat.jneat.genetics.Population;
 import com.github.jotask.neat.jneat.genetics.Specie;
 import com.github.jotask.neat.jneat.gui.Gui;
 import com.github.jotask.neat.jneat.gui.Renderer;
 import com.github.jotask.neat.jneat.network.NetworkRenderer;
-import com.github.jotask.neat.jneat.util.Ref;
+import com.github.jotask.neat.jneat.util.Constants;
 import com.github.jotask.neat.util.Files;
+import com.github.jotask.neat.util.Timer;
 
 import static com.badlogic.gdx.Gdx.gl;
 
@@ -26,7 +27,17 @@ import static com.badlogic.gdx.Gdx.gl;
  */
 public class Jota implements Renderer {
 
+    private static Jota instance;
+    public static Jota get(){
+        if(Jota.instance == null){
+            throw new RuntimeException();
+        }
+        return instance;
+    }
+
     private final JotaManager manager;
+
+    private final Config config;
 
     private NeatEnemy best;
 
@@ -38,8 +49,10 @@ public class Jota implements Renderer {
 
     private final Fitness fitness;
 
-    public Jota() {
-        this.timer = new Timer(Ref.INIT_TIME);
+    public Jota(final Config config) {
+        Jota.instance = this;
+        this.config = config;
+        this.timer = new Timer(new Float(config.get(Config.Property.INIT_TIME)));
         this.manager = new JotaManager();
         this.gui = new Gui(this);
         this.renderer = new NetworkRenderer(this);
@@ -52,14 +65,10 @@ public class Jota implements Renderer {
     }
 
     public void eval() {
-
         for (final NeatEnemy e : this.manager.getActive()) {
-
             if (e.isDisabled() || e.isDie())
                 continue;
-
             e.evaluateNetwork();
-
         }
     }
 
@@ -73,7 +82,7 @@ public class Jota implements Renderer {
         }
         this.manager.moveDisabled();
 
-        if(Ref.SAVE)
+        if(Constants.SAVE)
             Files.save(this.population);
 
     }
@@ -161,6 +170,9 @@ public class Jota implements Renderer {
 
     public void dispose(){
         this.manager.dispose();
+        Jota.instance = null;
     }
+
+    public Config getConfig() { return config; }
 
 }
