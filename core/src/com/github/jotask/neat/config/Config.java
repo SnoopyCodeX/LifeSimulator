@@ -27,7 +27,10 @@ public class Config {
         PERTURBATION,
         CROSSOVER,
         THRESHOLD,
-        INIT_TIME
+        INIT_TIME,
+        PENALIZATION_DISTANCE,
+        PENALIZATION_VELOCITY,
+        PENALIZATION_HITS
     }
 
     private final Properties properties;

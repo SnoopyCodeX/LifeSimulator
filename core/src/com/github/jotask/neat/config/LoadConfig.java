@@ -49,6 +49,9 @@ public class LoadConfig {
         properties.setProperty(Config.Property.CROSSOVER.name(), String.valueOf(Default.CROSSOVER));
         properties.setProperty(Config.Property.THRESHOLD.name(), String.valueOf(Default.THRESHOLD));
         properties.setProperty(Config.Property.INIT_TIME.name(), String.valueOf(Default.INIT_TIME));
+        properties.setProperty(Config.Property.PENALIZATION_DISTANCE.name(), String.valueOf(Default.PENALIZATION_DISTANCE));
+        properties.setProperty(Config.Property.PENALIZATION_VELOCITY.name(), String.valueOf(Default.PENALIZATION_VELOCITY));
+        properties.setProperty(Config.Property.PENALIZATION_HITS.name(), String.valueOf(Default.PENALIZATION_HITS));
 
         return new Config(properties);
 
