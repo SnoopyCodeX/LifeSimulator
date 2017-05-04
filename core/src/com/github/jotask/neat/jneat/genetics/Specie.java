@@ -6,6 +6,7 @@ import com.github.jotask.neat.config.Config;
 import com.github.jotask.neat.jneat.Jota;
 import com.github.jotask.neat.util.JRandom;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -59,6 +60,7 @@ public class Specie implements Json.Serializable{
     }
 
     private Genome crossover(Genome mother, Genome father) {
+        // Make sure that mother is the higher fitness genome
         if (father.fitness > mother.fitness) {
             final Genome tmp = mother;
             mother = father;
@@ -66,18 +68,23 @@ public class Specie implements Json.Serializable{
         }
 
         final Genome child = new Genome();
-        outerLoop: for (final Synapse gene1 : mother.getGenes()) {
-            for (final Synapse gene2 : father.getGenes()) {
-                if (gene1.getInnovation() == gene2.getInnovation()) {
-                    if (JRandom.nextBoolean() && gene2.isEnabled()) {
-                        child.getGenes().add(new Synapse(gene2));
-                        continue outerLoop;
-                    } else {
-                        break;
-                    }
+
+        HashMap<Integer, Synapse> innovations = new HashMap<Integer, Synapse>();
+        for(final Synapse s: father.getGenes()){
+            innovations.put(s.getInnovation(), s);
+        }
+
+        for(int i = 0; i < mother.getGenes().size(); i++){
+            Synapse one = mother.getGenes().get(i);
+            Synapse two = innovations.get(one.getInnovation());
+            if(two != null){
+                if(JRandom.nextBoolean() && two.isEnabled()){
+                    child.getGenes().add(new Synapse(two));
+                }else{
+                    child.getGenes().add(new Synapse(one));
                 }
+
             }
-            child.getGenes().add(new Synapse(gene1));
         }
 
         child.maxNeuron = Math.max(mother.maxNeuron, father.maxNeuron);

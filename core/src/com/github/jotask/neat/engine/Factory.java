@@ -53,7 +53,7 @@ public class Factory {
 
     }
 
-    public final NeatEnemy getNeatEnemy(final float threshold){
+    public final NeatEnemy getNeatEnemy(final double threshold){
 
         final Vector2 p = JRandom.randomPosition();
         float radius = .5f;

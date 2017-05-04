@@ -26,7 +26,7 @@ public final class JotaManager {
         final Factory factory = Neat.get().getFactory();
 
         final int population = new Integer(Jota.get().getConfig().get(Config.Property.POPULATION));
-        final float threshold = new Float(Jota.get().getConfig().get(Config.Property.THRESHOLD));
+        final double threshold = new Double(Jota.get().getConfig().get(Config.Property.THRESHOLD));
 
         for(int i = 0; i < population; i++){
             final NeatEnemy e = factory.getNeatEnemy(threshold);

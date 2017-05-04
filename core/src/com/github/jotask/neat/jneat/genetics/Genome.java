@@ -5,9 +5,11 @@ import com.badlogic.gdx.utils.JsonValue;
 import com.github.jotask.neat.config.Config;
 import com.github.jotask.neat.jneat.Jota;
 import com.github.jotask.neat.jneat.util.Constants;
+import com.github.jotask.neat.jneat.util.Util;
 import com.github.jotask.neat.util.JRandom;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -55,7 +57,7 @@ public class Genome implements Json.Serializable{
 
         this.genes = new LinkedList<Synapse>();
         this.fitness = 0.0;
-        this.maxNeuron =  Constants.INPUTS + Constants.OUTPUTS - 1;
+        this.maxNeuron =  Constants.INPUTS + Constants.OUTPUTS;
         this.globalRank = 0;
         this.step_size = new Double(Jota.get().getConfig().get(Config.Property.STEP_SIZE));
     }
@@ -79,16 +81,27 @@ public class Genome implements Json.Serializable{
     }
 
     private double disjoint(final Genome genome) {
-        double disjointGenes = 0.0;
-        search: for (final Synapse gene : genes) {
-            for (final Synapse otherGene : genome.genes) {
-                if (gene.getInnovation() == otherGene.getInnovation()) {
-                    continue search;
-                }
-            }
-            ++disjointGenes;
+        HashMap<Integer, Boolean> one = new HashMap<Integer, Boolean>();
+        for(final Synapse s: this.genes){
+            one.put(s.getInnovation(), true);
         }
-        return disjointGenes / Math.max(genes.size(), genome.genes.size());
+        HashMap<Integer, Boolean> two = new HashMap<Integer, Boolean>();
+        for(final Synapse s: genome.genes){
+            two.put(s.getInnovation(), true);
+        }
+        double disjointGenes = 0.0;
+        for(final Synapse s: this.genes){
+            if(two.get(s.getInnovation()) != null && !two.get(s.getInnovation())){
+                disjointGenes++;
+            }
+        }
+        for(final Synapse s: genome.genes){
+            if(one.get(s.getInnovation()) != null && !one.get(s.getInnovation())){
+                disjointGenes++;
+            }
+        }
+        int n = Math.max(this.genes.size(), genome.getGenes().size());
+        return disjointGenes / n;
     }
 
     void mutate() {
@@ -108,8 +121,8 @@ public class Genome implements Json.Serializable{
         if (JRandom.random() < ENABLE_MUTATION)
             mutateEnableDisable(true);
 
-        if (JRandom.random() < DISABLE_MUTATION)
-            mutateEnableDisable(false);
+//        if (JRandom.random() < DISABLE_MUTATION)
+//            mutateEnableDisable(false);
 
     }
 
@@ -127,11 +140,27 @@ public class Genome implements Json.Serializable{
 
         final Synapse gene = candidates.get(JRandom.randomIndex(candidates));
         gene.setEnabled(!gene.isEnabled());
+
     }
 
     private void mutateLink(final boolean forceBias) {
-        final int neuron1 = randomNeuron(false, true);
-        final int neuron2 = randomNeuron(true, false);
+        int neuron1 = randomNeuron(false, true);
+        int neuron2 = randomNeuron(true, false);
+
+
+        if(Util.isInput(neuron1) && Util.isInput(neuron2)){
+            // Both are inputs
+            return;
+        }else if(Util.isOutput(neuron1) && Util.isOutput(neuron2)){
+            // Both are outputs
+            return;
+        }
+
+        if(Util.isInput(neuron2)){
+            final int tmp = neuron1;
+            neuron1 = neuron2;
+            neuron2 = tmp;
+        }
 
         final Synapse newLink = new Synapse();
         newLink.setInput(neuron1);
@@ -145,13 +174,15 @@ public class Genome implements Json.Serializable{
             return;
         }
 
-        newLink.setInnovation(++Population.innovation);
+        newLink.setInnovation(Population.newInnovation());
         newLink.setWeight(JRandom.random() * 4.0 - 2.0);
 
         genes.add(newLink);
+
     }
 
     private void mutateNode() {
+
         if (genes.isEmpty()) {
             return;
         }
@@ -163,18 +194,18 @@ public class Genome implements Json.Serializable{
 
         gene.setEnabled(false);
 
-        ++maxNeuron;
+        maxNeuron++;
 
         final Synapse gene1 = new Synapse(gene);
         gene1.setOutput(maxNeuron);
         gene1.setWeight(1.0);
-        gene1.setInnovation(++Population.innovation);
+        gene1.setInnovation(Population.newInnovation());
         gene1.setEnabled(true);
         genes.add(gene1);
 
         final Synapse gene2 = new Synapse(gene);
         gene2.setInput(maxNeuron);
-        gene2.setInnovation(++Population.innovation);
+        gene2.setInnovation(Population.newInnovation());
         gene2.setEnabled(true);
         genes.add(gene2);
     }
@@ -228,15 +259,18 @@ public class Genome implements Json.Serializable{
     }
 
     private double weights(final Genome genome) {
+        HashMap<Integer, Synapse> map = new HashMap<Integer, Synapse>();
+        for(final Synapse s: genome.genes){
+            map.put(s.getInnovation(), s);
+        }
+
         double sum = 0.0;
-        double coincident = 0.0;
-        search: for (final Synapse gene : genes) {
-            for (final Synapse otherGene : genome.genes) {
-                if (gene.getInnovation() == otherGene.getInnovation()) {
-                    sum += Math.abs(gene.getWeight() - otherGene.getWeight());
-                    ++coincident;
-                    continue search;
-                }
+        int coincident = 0;
+        for(final Synapse s: this.genes){
+            if(map.get(s.getInnovation()) != null){
+                final Synapse tmp = map.get(s.getInnovation());
+                sum += Math.abs(s.getWeight() - tmp.getWeight());
+                coincident++;
             }
         }
         return sum / coincident;

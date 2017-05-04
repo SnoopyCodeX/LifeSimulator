@@ -33,11 +33,11 @@ public class NeatEnemy extends Enemy{
 
     private Network network;
 
-    private final float THRESHOLD;
+    private final double THRESHOLD;
 
     public boolean isBest;
 
-    public NeatEnemy(Body body, final float THRESHOLD) {
+    public NeatEnemy(Body body, final double THRESHOLD) {
         super(body);
         this.THRESHOLD = THRESHOLD;
         this.v = new Vector2();

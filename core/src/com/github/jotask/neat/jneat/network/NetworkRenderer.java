@@ -69,7 +69,7 @@ public class NetworkRenderer implements Renderer {
             this.network = e.getNetwork();
         }
 
-        // Create new network for render
+        // Create new neurons for render
         float yInpStart = rectangle.y + (rectangle.height * .5f) + ((Cell.SIZE * Constants.INPUTS) * .5f) - Cell.SIZE;
         float yOutStart = rectangle.y + (rectangle.height * .5f) + ((Cell.SIZE * Constants.OUTPUTS) * .5f) - Cell.SIZE;
 
@@ -79,7 +79,7 @@ public class NetworkRenderer implements Renderer {
         float minX = rectangle.x + Cell.SIZE;
         float maxX = rectangle.x + rectangle.width - Cell.SIZE;
 
-        for (final Map.Entry<Integer, Neuron> entry : this.network.network.entrySet()) {
+        for (final Map.Entry<Integer, Neuron> entry : this.network.neurons.entrySet()) {
             final int i = entry.getKey();
             final Neuron neuron = entry.getValue();
 

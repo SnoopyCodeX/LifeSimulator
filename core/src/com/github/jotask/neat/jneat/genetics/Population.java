@@ -20,7 +20,12 @@ public class Population implements Json.Serializable{
     private final int POPULATION;
     private final int STALE_SPECIES;
 
-    static int innovation = Constants.INPUTS + Constants.OUTPUTS - 1;
+    private static int innovation = Constants.OUTPUTS;
+
+    public static int newInnovation(){
+        innovation++;
+        return innovation;
+    }
 
     private final List<Specie> species;
     private int generation;
@@ -36,16 +41,15 @@ public class Population implements Json.Serializable{
     }
 
     private void addToSpecies(final Genome child) {
-        for (final Specie species : this.species) {
-            if (child.sameSpecies(species.getGenomes().get(0))) {
-                species.getGenomes().add(child);
+        for(final Specie s: this.species){
+            if(child.sameSpecies(s.getGenomes().getFirst())){
+                s.getGenomes().push(child);
                 return;
             }
         }
-
-        final Specie childSpecies = new Specie();
-        childSpecies.getGenomes().add(child);
-        species.add(childSpecies);
+        final Specie s = new Specie();
+        s.getGenomes().push(child);
+        this.species.add(s);
     }
 
     private void cullSpecies(final boolean cutToOne) {
@@ -59,9 +63,11 @@ public class Population implements Json.Serializable{
                 }
             });
 
-            double remaining = Math.ceil(species.getGenomes().size() / 2.0);
-            if (cutToOne) {
+            final double remaining;
+            if(cutToOne){
                 remaining = 1.0;
+            }else{
+                remaining = Math.ceil(species.getGenomes().size() / 2.0);
             }
 
             while (species.getGenomes().size() > remaining) {
@@ -79,6 +85,7 @@ public class Population implements Json.Serializable{
     }
 
     public void newGeneration() {
+        // Cull the bottom half od each species
         cullSpecies(false);
         rankGlobally();
         removeStaleSpecies();
@@ -89,21 +96,22 @@ public class Population implements Json.Serializable{
         removeWeakSpecies();
         final double sum = totalAverageFitness();
         final List<Genome> children = new ArrayList<Genome>();
-        for (final Specie species : this.species) {
-            final double breed = Math.floor(species.averageFitness / sum * POPULATION) - 1.0;
-            for (int i = 0; i < breed; ++i) {
-                children.add(species.breedChild());
+        for(final Specie s: this.species){
+            final double breed = Math.floor(s.averageFitness / sum * POPULATION) - 1.0;
+            for(int i = 0; i < breed; i++){
+                children.add(s.breedChild());
             }
         }
-        cullSpecies(true);
 
-        while (children.size() + species.size() < POPULATION) {
-            final Specie species = this.species.get(JRandom.randomIndex(this.species));
-            children.add(species.breedChild());
+        // Cull all but the top member of each species
+        cullSpecies(true);
+        while(children.size() + this.species.size() < POPULATION){
+            final Specie s = this.species.get(JRandom.randomIndex(this.species));
+            children.add(s.breedChild());
         }
 
-        for (final Genome child : children) {
-            addToSpecies(child);
+        for(final Genome g: children){
+            this.addToSpecies(g);;
         }
 
         while(this.species.size() < POPULATION * .5f) {
@@ -180,11 +188,11 @@ public class Population implements Json.Serializable{
                 }
             });
 
-            if (species.getGenomes().get(0).fitness > species.topFitness) {
-                species.topFitness = species.getGenomes().get(0).fitness;
+            if (species.getGenomes().getFirst().fitness > species.topFitness) {
+                species.topFitness = species.getGenomes().getFirst().fitness;
                 species.staleness = 0;
             } else {
-                ++species.staleness;
+                species.staleness++;
             }
 
             if (species.staleness < STALE_SPECIES || species.topFitness >= maxFitness) {

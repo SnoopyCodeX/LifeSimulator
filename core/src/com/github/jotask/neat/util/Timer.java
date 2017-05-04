@@ -11,11 +11,8 @@ public class Timer {
     private long time;
     private long next;
 
-    public Timer(float seg){
-
-        time = Timer.toSec(seg);
-
-        reset();
+    public Timer(float sec){
+        setTime(sec);
     }
 
     public static long toSec(float seg){
@@ -47,6 +44,17 @@ public class Timer {
     public void add(float add){
         long n = Timer.toSec(add);
         time += n;
+        this.reset();
+    }
+
+    public void setTime(float sec){
+        time = Timer.toSec(sec);
+        reset();
+    }
+
+    public void increase(final float sec){
+        float next = Timer.toSec(sec);
+        this.time += next;
         this.reset();
     }
 

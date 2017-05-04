@@ -52,6 +52,8 @@ public class LoadConfig {
         properties.setProperty(Config.Property.PENALIZATION_DISTANCE.name(), String.valueOf(Default.PENALIZATION_DISTANCE));
         properties.setProperty(Config.Property.PENALIZATION_VELOCITY.name(), String.valueOf(Default.PENALIZATION_VELOCITY));
         properties.setProperty(Config.Property.PENALIZATION_HITS.name(), String.valueOf(Default.PENALIZATION_HITS));
+        properties.setProperty(Config.Property.TIME_INCREASE.name(), String.valueOf(Default.TIME_INCREASE));
+        properties.setProperty(Config.Property.EACH_GENERATION.name(), String.valueOf(Default.INCREASE_EACH_GENERATION));
 
         return new Config(properties);
 

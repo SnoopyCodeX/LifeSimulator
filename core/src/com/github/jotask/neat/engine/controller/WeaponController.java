@@ -14,12 +14,12 @@ public class WeaponController {
 
     public WeaponController(final Weapon weapon) { this.weapon = weapon; }
 
-    public void left(){ weapon.shotDirection.add(-1, 0); }
+    public void left(){ weapon.shotDirection.set(-1, 0); }
 
-    public void right(){ weapon.shotDirection.add(1, 0); }
+    public void right(){ weapon.shotDirection.set(1, 0); }
 
-    public void up(){ weapon.shotDirection.add(0, 1); }
+    public void up(){ weapon.shotDirection.set(0, -1); }
 
-    public void down(){ weapon.shotDirection.add(0, -1); }
+    public void down(){ weapon.shotDirection.set(0, 1); }
 
 }

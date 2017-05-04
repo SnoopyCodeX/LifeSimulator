@@ -30,7 +30,9 @@ public class Config {
         INIT_TIME,
         PENALIZATION_DISTANCE,
         PENALIZATION_VELOCITY,
-        PENALIZATION_HITS
+        PENALIZATION_HITS,
+        TIME_INCREASE,
+        EACH_GENERATION
     }
 
     private final Properties properties;

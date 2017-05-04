@@ -61,6 +61,9 @@ public class Sword extends Weapon {
 
     @Override
     public boolean attack() {
+        if(this.shotDirection.isZero()){
+            return false;
+        }
         if(this.shotDirection.x < 0){
             this.stab(180);
         }else if(this.shotDirection.x > 0){
@@ -69,8 +72,6 @@ public class Sword extends Weapon {
             this.stab(90);
         }else if(this.shotDirection.y > 0){
             this.stab(-90);
-        }else{
-            return false;
         }
         return true;
     }

@@ -27,6 +27,8 @@ import static com.badlogic.gdx.Gdx.gl;
  */
 public class Jota implements Renderer {
 
+    public static final String filename = "jota.properties";
+
     private static Jota instance;
     public static Jota get(){
         if(Jota.instance == null){
@@ -49,6 +51,9 @@ public class Jota implements Renderer {
 
     private final Fitness fitness;
 
+    private final float INCREASE_GENERATION_TIME;
+    private final int EACH_GENERATION;
+
     public Jota(final Config config) {
         Jota.instance = this;
         this.config = config;
@@ -57,9 +62,15 @@ public class Jota implements Renderer {
         this.gui = new Gui(this);
         this.renderer = new NetworkRenderer(this);
 
+        this.INCREASE_GENERATION_TIME = new Float(config.get(Config.Property.TIME_INCREASE));
+        this.EACH_GENERATION = new Integer(config.get(Config.Property.EACH_GENERATION));
+
         this.population = Files.load();
 
         this.fitness = new BasicFitness();
+
+        load();
+
         this.initializeGame();
 
     }
@@ -126,7 +137,11 @@ public class Jota implements Renderer {
         this.population.newGeneration();
         this.initializeGame();
         Neat.get().getPlayer().respawn();
-        this.timer.reset();
+        if(this.getPop().getGeneration() % EACH_GENERATION == 0){
+            this.timer.increase(this.INCREASE_GENERATION_TIME);
+        }else {
+            this.timer.reset();
+        }
     }
 
     private void setBest(NeatEnemy fp){
@@ -169,10 +184,37 @@ public class Jota implements Renderer {
     }
 
     public void dispose(){
+        save();
         this.manager.dispose();
         Jota.instance = null;
     }
 
     public Config getConfig() { return config; }
+
+    public void save(){
+        // TODO save
+//        FileHandle file = new FileHandle(Jota.filename);
+//        OutputStream os = null;
+//        try {
+//            os = new FileOutputStream(file.file());
+//            Properties properties = new Properties();
+//            properties.store(os);
+//
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        }finally {
+//            if(os != null){
+//                try {
+//                    os.close();
+//                } catch (IOException e) {
+//                    // We can do nothing
+//                }
+//            }
+//        }
+    }
+
+    public void load(){
+        // TODO load
+    }
 
 }
