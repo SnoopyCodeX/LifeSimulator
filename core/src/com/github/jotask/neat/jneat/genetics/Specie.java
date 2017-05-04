@@ -77,13 +77,10 @@ public class Specie implements Json.Serializable{
         for(int i = 0; i < mother.getGenes().size(); i++){
             Synapse one = mother.getGenes().get(i);
             Synapse two = innovations.get(one.getInnovation());
-            if(two != null){
-                if(JRandom.nextBoolean() && two.isEnabled()){
-                    child.getGenes().add(new Synapse(two));
-                }else{
-                    child.getGenes().add(new Synapse(one));
-                }
-
+            if(two != null && JRandom.nextBoolean() && two.isEnabled()){
+                child.getGenes().add(new Synapse(two));
+            }else{
+                child.getGenes().add(new Synapse(one));
             }
         }
 

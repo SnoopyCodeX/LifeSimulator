@@ -38,8 +38,8 @@ public final class JRandom {
     }
 
     public static Vector2 randomPositionPlayer(){
-        final float offsetX = Constant.WORLD_WIDTH * .5f;
-        final float offsetY = Constant.WORLD_HEIGHT * .5f;
+        final float offsetX = Constant.WORLD_WIDTH * .001f;
+        final float offsetY = Constant.WORLD_HEIGHT * .001f;
 
         final float WIDTH = Constant.WORLD_WIDTH * .5f;
         final float HEIGHT = Constant.WORLD_HEIGHT * .5f;

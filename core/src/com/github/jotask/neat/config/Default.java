@@ -18,8 +18,8 @@ class Default {
     public static final float MUTATION = 1f;
 
     public static final float CONN_MUTATION    = .25f;
-    public static final float LINK_MUTATION    = 2f;
-    public static final float BIAS_MUTATION    = .4f;
+    public static final float LINK_MUTATION    = 1f;
+    public static final float BIAS_MUTATION    = .1f;
     public static final float NODE_MUTATION    = .50f;
     public static final float ENABLE_MUTATION  = .2f;
     public static final float DISABLE_MUTATION = .4f;

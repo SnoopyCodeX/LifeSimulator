@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.github.jotask.neat.Neat;
 import com.github.jotask.neat.engine.entity.Enemy;
 import com.github.jotask.neat.engine.entity.Entity;
-import com.github.jotask.neat.engine.entity.Food;
 
 import java.util.LinkedList;
 
@@ -31,9 +30,7 @@ public class EntityManager{
         if(entity == null)
             return false;
 
-        if(entity instanceof Food){
-            instance.foods++;
-        }else if(entity instanceof Enemy){
+        if(entity instanceof Enemy){
             instance.enemies++;
         }
 
@@ -50,7 +47,6 @@ public class EntityManager{
     public void update() {
 
         final LinkedList<Entity> newPopulation = new LinkedList<Entity>(entities);
-        int f = 0;
 
         for(Entity e: entities){
 
@@ -62,10 +58,7 @@ public class EntityManager{
                 newPopulation.remove(e);
                 Neat.get().getWorld().destroyBody(e.getBody());
 
-                if(e instanceof Food){
-                    instance.foods--;
-                    f++;
-                }else if(e instanceof Enemy){
+                if(e instanceof Enemy){
                     instance.enemies--;
                 }
 
